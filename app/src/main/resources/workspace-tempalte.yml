@@ -1,0 +1,38 @@
+# workspace:
+#   name: my-s3-sync
+#   description: "Synchronizacja plików lokalnych z S3"
+#
+# s3:
+#   bucket: my-s3-bucket
+#   region: us-east-1
+#   accessKeyId: YOUR_ACCESS_KEY
+#   secretAccessKey: YOUR_SECRET_KEY
+#   endpoint: https://s3.amazonaws.com   # opcjonalne, np. dla MinIO lub innego S3-kompatybilnego storage
+#
+# local:
+#   root: ~/my-local-folder
+#   include:
+#     - "**/*.txt"
+#     - "**/*.csv"
+#   exclude:
+#     - "**/temp/**"
+#     - "**/*.bak"
+#
+# sync:
+#   mode: bidirectional   # wartości: upload, download, bidirectional
+#   delete: true         # usuwa pliki z celu, które nie istnieją w źródle
+#   dryRun: false        # jeśli true, nie wykonuje faktycznej synchronizacji, tylko loguje
+#
+# logging:
+#   level: info          # debug, info, warn, error
+#   file: ~/.xs3sync/sync.log
+#
+# notifications:
+#   email:
+#     enabled: false
+#     to: your.email@example.com
+#     smtp:
+#       host: smtp.example.com
+#       port: 587
+#       username: user
+#       password: pass

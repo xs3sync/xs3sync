@@ -10,7 +10,8 @@ final class SyncCommand extends BaseCommand {
 
     @Override
     public void run() {
+        init();
+
         System.out.println("Rozpoczynam synchronizację...");
-        // tutaj logika synchronizacji
     }
 }

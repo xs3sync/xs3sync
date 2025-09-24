@@ -1,26 +1,20 @@
 package dev.xs3sync.commands;
 
-import java.io.File;
-
-import jakarta.annotation.Nonnull;
-
 import dev.xs3sync.Services;
-import dev.xs3sync.configuration.Configuration;
+import dev.xs3sync.workspace.Workspace;
 import picocli.CommandLine.Option;
 
 public abstract class BaseCommand implements Runnable
 {
     @Option(names = { "-v", "--verbose" })
-    boolean verbose;
+    private boolean verboseParameter;
 
-    @Option(names = { "-c", "--config" }, description = "Ścieżka do pliku konfiguracyjnego")
-    private File configFile;
+    @Option(names = { "-c", "--workspace" }, description = "Ścieżka do katalogu roboczego")
+    private String workspaceParameter;
 
     protected void init()
     {
-        final Configuration configuration = new Configuration(configFile);
-
-        Services.
-        System.out.printf("init ...");
+        final Workspace workspace = new Workspace(this.workspaceParameter, Services.pathUtil());
+        // final Configuration configuration = new Configuration(configFile);
     }
 }

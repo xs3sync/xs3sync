@@ -3,20 +3,29 @@ package dev.xs3sync;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
-import dev.xs3sync.configuration.Configuration;
+import dev.xs3sync.workspace.Workspace;
 
 public class Services {
-    private static @Nullable Configuration configuration = null;
+    private static @Nullable Workspace workspace = null;
+    private static @Nullable PathUtil pathUtil = null;
 
-    public synchronized static void setConfiguration(final @Nonnull Configuration configuration) {
-        Services.configuration = configuration;
+    public synchronized static void setWorkspace(final @Nonnull Workspace workspace) {
+        Services.workspace = workspace;
     }
 
-    public synchronized static @Nonnull Configuration configuration() {
-        if (configuration == null) {
-            throw new IllegalStateException("Configuration not initialized yet.");
+    public synchronized static @Nonnull Workspace workspace() {
+        if (workspace == null) {
+            throw new IllegalStateException("Workspace not initialized yet.");
         }
 
-        return configuration;
+        return workspace;
+    }
+
+    public synchronized static @Nonnull PathUtil pathUtil() {
+        if (pathUtil == null) {
+            pathUtil = new PathUtil();
+        }
+
+        return pathUtil;
     }
 }

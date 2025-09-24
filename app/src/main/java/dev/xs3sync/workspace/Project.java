@@ -1,4 +1,4 @@
-package dev.xs3sync.configuration;
+package dev.xs3sync.workspace;
 
 import jakarta.annotation.Nonnull;
 
