@@ -1,21 +1,21 @@
 package dev.xs3sync.workspace;
 
-import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.List;
 
 record ProjectYml(
-    @Nonnull String source,
-    @Nonnull Destination destination,
-    @Nonnull List<String> include,
-    @Nonnull List<String> exclude
+    @Nullable String source,
+    @Nullable DestinationYml destination,
+    @Nullable List<String> include,
+    @Nullable List<String> exclude
 ) {
-    public record Destination(
-        @Nonnull String bucket,
-        @Nonnull String region,
-        @Nonnull String accessKeyId,
-        @Nonnull String secretAccessKey,
-        @Nonnull String endpoint
+    public record DestinationYml(
+        @Nullable String bucket,
+        @Nullable String region,
+        @Nullable String accessKeyId,
+        @Nullable String secretAccessKey,
+        @Nullable String endpoint
     ) {
     }
 }

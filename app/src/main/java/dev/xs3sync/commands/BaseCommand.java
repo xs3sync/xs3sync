@@ -17,7 +17,7 @@ public abstract class BaseCommand implements Runnable
         final Workspace workspace = new Workspace(
             this.workspaceParameter,
             Services.pathUtil(),
-            Services.fileUtil(),
+            Services.filesUtil(),
             Services.yamlMapper()
         );
         // final Configuration configuration = new Configuration(configFile);

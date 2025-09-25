@@ -18,9 +18,12 @@ public class YamlMapper {
     public <T> @Nonnull T readValue(
         final @Nonnull File src,
         final @Nonnull Class<T> valueType
-    )
-        throws IOException {
+    ) {
 
-        return mapper.readValue(src, valueType);
+        try {
+            return mapper.readValue(src, valueType);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

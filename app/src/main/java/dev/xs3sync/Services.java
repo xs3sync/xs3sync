@@ -7,7 +7,7 @@ import jakarta.annotation.Nullable;
 public class Services {
     private static @Nullable Workspace workspace = null;
     private static @Nullable PathUtil pathUtil = null;
-    private static @Nullable FileUtil fileUtil = null;
+    private static @Nullable FilesUtil filesUtil = null;
     private static @Nullable YamlMapper yamlMapper = null;
 
     public synchronized static void setWorkspace(final @Nonnull Workspace workspace) {
@@ -30,12 +30,12 @@ public class Services {
         return pathUtil;
     }
 
-    public synchronized static @Nonnull FileUtil fileUtil() {
-        if (fileUtil == null) {
-            fileUtil = new FileUtil();
+    public synchronized static @Nonnull FilesUtil filesUtil() {
+        if (filesUtil == null) {
+            filesUtil = new FilesUtil();
         }
 
-        return fileUtil;
+        return filesUtil;
     }
 
     public synchronized static @Nonnull YamlMapper yamlMapper() {

@@ -1,6 +1,6 @@
 package dev.xs3sync.workspace;
 
-import dev.xs3sync.FileUtil;
+import dev.xs3sync.FilesUtil;
 import dev.xs3sync.PathUtil;
 import dev.xs3sync.YamlMapper;
 import jakarta.annotation.Nonnull;
@@ -10,12 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Workspace {
+    
     private final List<Project> projects = new ArrayList<>();
 
     public Workspace(
         final @Nonnull String path,
         final @Nonnull PathUtil pathUtil,
-        final @Nonnull FileUtil fileUtil,
+        final @Nonnull FilesUtil fileUtil,
         final @Nonnull YamlMapper yamlMapper
     ) {
         final Path path1 = pathUtil.expand(Path.of(path));
@@ -36,20 +37,46 @@ public class Workspace {
         }
 
         for (final Path projectPath : fileUtil.list(projectsPath).toList()) {
-            final Project project = loadProject(projectPath, yamlMapper);
+            final Project project = loadProject(projectPath, yamlMapper, fileUtil);
         }
-
-        // final List<Path> projects = fileUtil.list(path1).toList();
-
-        System.out.printf("test");
-        // Path path = path.toPath();
-        // System.out.printf("test");
     }
 
     private @Nonnull Project loadProject(
         final @Nonnull Path projectPath,
-        final @Nonnull YamlMapper yamlMapper
+        final @Nonnull YamlMapper yamlMapper,
+        final @Nonnull FilesUtil fileUtil
     ) {
         final ProjectYml projectYml = yamlMapper.readValue(projectPath.toFile(), ProjectYml.class);
+        final Project.Builder builder = Project.builder();
+
+        builder.id(fileUtil.getFileName(projectPath, true).toString());
+
+        if (projectYml.source() != null)
+            builder.source(projectYml.source());
+
+        if (projectYml.destination() != null) {
+            if (projectYml.destination().bucket() != null)
+                builder.destinationBucket(projectYml.destination().bucket());
+
+            if (projectYml.destination().region() != null)
+                builder.destinationRegion(projectYml.destination().region());
+
+            if (projectYml.destination().accessKeyId() != null)
+                builder.destinationAccessKeyId(projectYml.destination().accessKeyId());
+
+            if (projectYml.destination().secretAccessKey() != null)
+                builder.destinationSecretAccessKey(projectYml.destination().secretAccessKey());
+
+            if (projectYml.destination().endpoint() != null)
+                builder.destinationEndpoint(projectYml.destination().endpoint());
+        }
+
+        if (projectYml.include() != null)
+            builder.include(projectYml.include());
+
+        if (projectYml.exclude() != null)
+            builder.exclude(projectYml.exclude());
+
+        return builder.build();
     }
 }

@@ -9,7 +9,7 @@ import java.nio.file.attribute.FileAttribute;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
-public class FileUtil {
+public class FilesUtil {
 
     public @Nonnull InputStream getInputStreamFromResource(final @Nonnull String path) {
         final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(path);
@@ -65,11 +65,32 @@ public class FileUtil {
         return Files.isDirectory(path, options);
     }
 
-    public @Nonnull Path createDirectories(final @Nonnull Path dir, final @Nonnull FileAttribute<?>... attrs) {
+    public void createDirectories(final @Nonnull Path dir, final @Nonnull FileAttribute<?>... attrs) {
         try {
-            return Files.createDirectories(dir, attrs);
+            Files.createDirectories(dir, attrs);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public @Nonnull Path getFileName(final @Nonnull Path path) {
+        return getFileName(path, false);
+    }
+
+    public @Nonnull Path getFileName(final @Nonnull Path path, boolean noExtension) {
+        final Path fileName = path.getFileName();
+
+        if (fileName == null) {
+            throw new IllegalArgumentException("Ścieżka nie zawiera nazwy pliku: " + path);
+        }
+
+        final String name = fileName.toString();
+        if (noExtension) {
+            int dotIndex = name.lastIndexOf('.');
+            if (dotIndex > 0) {
+                return Path.of(name.substring(0, dotIndex));
+            }
+        }
+        return Path.of(name);
     }
 }
