@@ -14,7 +14,12 @@ public abstract class BaseCommand implements Runnable
 
     protected void init()
     {
-        final Workspace workspace = new Workspace(this.workspaceParameter, Services.pathUtil());
+        final Workspace workspace = new Workspace(
+            this.workspaceParameter,
+            Services.pathUtil(),
+            Services.fileUtil(),
+            Services.yamlMapper()
+        );
         // final Configuration configuration = new Configuration(configFile);
     }
 }

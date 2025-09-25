@@ -1,23 +1,75 @@
 package dev.xs3sync;
 
+import jakarta.annotation.Nonnull;
+
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.*;
+import java.nio.file.attribute.FileAttribute;
+import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 public class FileUtil {
 
-    public FileUtil() {
+    public @Nonnull InputStream getInputStreamFromResource(final @Nonnull String path) {
+        final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(path);
+
+        if (inputStream == null) {
+            throw new NoSuchElementException(path);
+        }
+
+        return inputStream;
+    }
+
+    public boolean exists(
+        final @Nonnull Path path,
+        final @Nonnull LinkOption... options
+    ) {
+        return Files.exists(path, options);
+    }
+
+    public void copy(
+        final @Nonnull InputStream inputStream,
+        final @Nonnull Path target,
+        final @Nonnull CopyOption... options
+    ) {
+        try {
+            Files.createDirectories(target.getParent());
+            Files.copy(inputStream, target, options);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public @Nonnull Stream<Path> walk(
+        final @Nonnull Path start,
+        final @Nonnull FileVisitOption... options
+    ) {
+        try {
+            return Files.walk(start, options);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public @Nonnull Stream<Path> list(final @Nonnull Path dir) {
+        try {
+            return Files.list(dir);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
-    /**
-     * Otwiera InputStream do pliku znajdującego się w katalogu resources.
-     * Przykład: jeśli w resources jest plik "config/default.project.yml",
-     * to wywołanie zwróci InputStream do tego pliku.
-     */
-    public InputStream getInputStreamFromResource(String resourcePath) {
-        // Pobranie InputStream przez ClassLoader
-        InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath);
+    public boolean isDirectory(final @Nonnull Path path, final @Nonnull LinkOption... options) {
+        return Files.isDirectory(path, options);
+    }
 
-        // Sprawdzenie czy plik istnieje
-        return Objects.requireNonNull(is, "Resource not found: " + resourcePath);
+    public @Nonnull Path createDirectories(final @Nonnull Path dir, final @Nonnull FileAttribute<?>... attrs) {
+        try {
+            return Files.createDirectories(dir, attrs);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

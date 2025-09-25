@@ -9,12 +9,13 @@ repositories {
 }
 
 dependencies {
-    // Implementation
+    // implementation
     implementation libs.guava
     implementation 'info.picocli:picocli:4.7.7'
     implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.20.0'
 
-    // Tests
+    // test
     testImplementation libs.junit.jupiter
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

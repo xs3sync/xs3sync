@@ -1,13 +1,14 @@
 package dev.xs3sync;
 
+import dev.xs3sync.workspace.Workspace;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-
-import dev.xs3sync.workspace.Workspace;
 
 public class Services {
     private static @Nullable Workspace workspace = null;
     private static @Nullable PathUtil pathUtil = null;
+    private static @Nullable FileUtil fileUtil = null;
+    private static @Nullable YamlMapper yamlMapper = null;
 
     public synchronized static void setWorkspace(final @Nonnull Workspace workspace) {
         Services.workspace = workspace;
@@ -27,5 +28,21 @@ public class Services {
         }
 
         return pathUtil;
+    }
+
+    public synchronized static @Nonnull FileUtil fileUtil() {
+        if (fileUtil == null) {
+            fileUtil = new FileUtil();
+        }
+
+        return fileUtil;
+    }
+
+    public synchronized static @Nonnull YamlMapper yamlMapper() {
+        if (yamlMapper == null) {
+            yamlMapper = new YamlMapper();
+        }
+
+        return yamlMapper;
     }
 }
