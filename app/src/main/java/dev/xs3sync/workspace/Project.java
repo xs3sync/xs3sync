@@ -6,6 +6,8 @@ import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Collections.unmodifiableList;
+
 public class Project {
 
     private @Nonnull String id;
@@ -38,6 +40,42 @@ public class Project {
         this.destinationEndpoint = destinationEndpoint;
         this.include = include;
         this.exclude = exclude;
+    }
+
+    public @Nonnull String getId() {
+        return id;
+    }
+
+    public @Nonnull String getSource() {
+        return source;
+    }
+
+    public @Nonnull String getDestinationBucket() {
+        return destinationBucket;
+    }
+
+    public @Nonnull String getDestinationRegion() {
+        return destinationRegion;
+    }
+
+    public @Nonnull String getDestinationAccessKeyId() {
+        return destinationAccessKeyId;
+    }
+
+    public @Nonnull String getDestinationSecretAccessKey() {
+        return destinationSecretAccessKey;
+    }
+
+    public @Nonnull String getDestinationEndpoint() {
+        return destinationEndpoint;
+    }
+
+    public @Nonnull List<String> getInclude() {
+        return unmodifiableList(include);
+    }
+
+    public @Nonnull List<String> getExclude() {
+        return unmodifiableList(exclude);
     }
 
     public static Builder builder() {

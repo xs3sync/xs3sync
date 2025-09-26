@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.FileAttribute;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
@@ -49,6 +50,37 @@ public class FilesUtil {
             return Files.walk(start, options);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public @Nonnull Stream<Path> walk(
+        final @Nonnull Path start,
+        final @Nonnull List<String> exclude,
+        final @Nonnull List<String> include,
+        final @Nonnull FileVisitOption... options
+    ) {
+        final List<PathMatcher> includeMatchers = include.stream()
+            .map(pattern -> FileSystems.getDefault().getPathMatcher("glob:" + pattern))
+            .toList();
+
+        final List<PathMatcher> excludeMatchers = exclude.stream()
+            .map(pattern -> FileSystems.getDefault().getPathMatcher("glob:" + pattern))
+            .toList();
+
+        try {
+            return Files.walk(start, options)
+                .filter(Files::isRegularFile)
+                .filter(p -> {
+                    // include check
+                    boolean included = includeMatchers.isEmpty()
+                        || includeMatchers.stream().anyMatch(m -> m.matches(p));
+                    if (!included) return false;
+
+                    // exclude check
+                    return excludeMatchers.stream().noneMatch(m -> m.matches(p));
+                });
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to walk path: " + start, e);
         }
     }
 

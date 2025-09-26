@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Workspace {
-    
+
     private final List<Project> projects = new ArrayList<>();
 
     public Workspace(
@@ -37,14 +37,19 @@ public class Workspace {
         }
 
         for (final Path projectPath : fileUtil.list(projectsPath).toList()) {
-            final Project project = loadProject(projectPath, yamlMapper, fileUtil);
+            projects.add(loadProject(projectPath, yamlMapper, fileUtil, pathUtil));
         }
+    }
+
+    public @Nonnull List<Project> getProjects() {
+        return projects;
     }
 
     private @Nonnull Project loadProject(
         final @Nonnull Path projectPath,
         final @Nonnull YamlMapper yamlMapper,
-        final @Nonnull FilesUtil fileUtil
+        final @Nonnull FilesUtil fileUtil,
+        final @Nonnull PathUtil pathUtil
     ) {
         final ProjectYml projectYml = yamlMapper.readValue(projectPath.toFile(), ProjectYml.class);
         final Project.Builder builder = Project.builder();
@@ -52,7 +57,7 @@ public class Workspace {
         builder.id(fileUtil.getFileName(projectPath, true).toString());
 
         if (projectYml.source() != null)
-            builder.source(projectYml.source());
+            builder.source(pathUtil.expand(Path.of(projectYml.source())).toString());
 
         if (projectYml.destination() != null) {
             if (projectYml.destination().bucket() != null)
