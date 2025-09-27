@@ -12,7 +12,7 @@ import picocli.CommandLine.Command;
 public class Xs3SyncCommand extends BaseCommand {
 
     public static void main(String[] args) {
-        CommandLine cmd = new CommandLine(new Xs3SyncCommand());
+        final CommandLine cmd = new CommandLine(new Xs3SyncCommand());
         cmd.addSubcommand("sync", new SyncCommand());
         cmd.execute(args);
     }

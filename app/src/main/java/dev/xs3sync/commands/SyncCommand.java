@@ -17,11 +17,11 @@ final class SyncCommand extends BaseCommand {
     public void run() {
         init();
 
+        System.out.println("Rozpoczynam synchronizację...");
+
         for (final Project project : workspace.getProjects()) {
             final SyncService syncService = new SyncService(Path.of(project.getSource()), Services.filesUtil());
             syncService.sync();
         }
-
-        System.out.println("Rozpoczynam synchronizację...");
     }
 }

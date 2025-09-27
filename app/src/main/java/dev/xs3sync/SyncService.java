@@ -3,7 +3,6 @@ package dev.xs3sync;
 import jakarta.annotation.Nonnull;
 
 import java.nio.file.Path;
-import java.util.List;
 
 public class SyncService {
 
@@ -18,10 +17,10 @@ public class SyncService {
         this.filesUtil = filesUtil;
     }
 
-
     public void sync() {
-        List<Path> list = filesUtil.walk(path, List.of(), List.of()).toList();
+        // final List<Path> list = filesUtil.walk(path, List.of(), List.of())
+        //     .toList();
 
-        System.out.printf("test");
+        // System.out.printf("test");
     }
 }
