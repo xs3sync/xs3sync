@@ -2,6 +2,7 @@ package dev.xs3sync;
 
 import jakarta.annotation.Nonnull;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
@@ -20,6 +21,38 @@ public class FilesUtil {
         }
 
         return inputStream;
+    }
+
+    public @Nonnull InputStream getInputStream(final @Nonnull Path path) {
+        try {
+            if (!Files.exists(path)) {
+                throw new IllegalArgumentException("File does not exist: " + path);
+            }
+
+            if (!Files.isReadable(path)) {
+                throw new IllegalArgumentException("File is not readable: " + path);
+            }
+
+            return new FileInputStream(path.toFile());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to open InputStream for path: " + path, e);
+        }
+    }
+
+    public long size(final @Nonnull Path path) {
+        try {
+            if (!Files.exists(path)) {
+                throw new IllegalArgumentException("File does not exist: " + path);
+            }
+
+            if (!Files.isReadable(path)) {
+                throw new IllegalArgumentException("File is not readable: " + path);
+            }
+
+            return Files.size(path);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to open InputStream for path: " + path, e);
+        }
     }
 
     public boolean exists(

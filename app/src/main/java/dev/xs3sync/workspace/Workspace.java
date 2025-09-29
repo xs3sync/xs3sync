@@ -72,6 +72,9 @@ public class Workspace {
             if (projectYml.destination().secretAccessKey() != null)
                 builder.destinationSecretAccessKey(projectYml.destination().secretAccessKey());
 
+            if (projectYml.destination().profile() != null)
+                builder.destinationProfile(projectYml.destination().profile());
+
             if (projectYml.destination().endpoint() != null)
                 builder.destinationEndpoint(projectYml.destination().endpoint());
         }

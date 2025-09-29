@@ -9,13 +9,13 @@ import java.util.List;
 import static java.util.Collections.unmodifiableList;
 
 public class Project {
-
     private @Nonnull String id;
     private @Nonnull String source;
     private @Nonnull String destinationBucket;
     private @Nonnull String destinationRegion;
-    private @Nonnull String destinationAccessKeyId;
-    private @Nonnull String destinationSecretAccessKey;
+    private @Nullable String destinationAccessKeyId;
+    private @Nullable String destinationSecretAccessKey;
+    private @Nullable String destinationProfile;
     private @Nonnull String destinationEndpoint;
     private @Nonnull List<String> include;
     private @Nonnull List<String> exclude;
@@ -25,8 +25,9 @@ public class Project {
         final @Nonnull String source,
         final @Nonnull String destinationBucket,
         final @Nonnull String destinationRegion,
-        final @Nonnull String destinationAccessKeyId,
-        final @Nonnull String destinationSecretAccessKey,
+        final @Nullable String destinationAccessKeyId,
+        final @Nullable String destinationSecretAccessKey,
+        final @Nullable String destinationProfile,
         final @Nonnull String destinationEndpoint,
         final @Nonnull List<String> include,
         final @Nonnull List<String> exclude
@@ -37,6 +38,7 @@ public class Project {
         this.destinationRegion = destinationRegion;
         this.destinationAccessKeyId = destinationAccessKeyId;
         this.destinationSecretAccessKey = destinationSecretAccessKey;
+        this.destinationProfile = destinationProfile;
         this.destinationEndpoint = destinationEndpoint;
         this.include = include;
         this.exclude = exclude;
@@ -58,12 +60,16 @@ public class Project {
         return destinationRegion;
     }
 
-    public @Nonnull String getDestinationAccessKeyId() {
+    public @Nullable String getDestinationAccessKeyId() {
         return destinationAccessKeyId;
     }
 
-    public @Nonnull String getDestinationSecretAccessKey() {
+    public @Nullable String getDestinationSecretAccessKey() {
         return destinationSecretAccessKey;
+    }
+
+    public @Nullable String getDestinationProfile() {
+        return destinationProfile;
     }
 
     public @Nonnull String getDestinationEndpoint() {
@@ -89,6 +95,7 @@ public class Project {
         private @Nullable String destinationRegion;
         private @Nullable String destinationAccessKeyId;
         private @Nullable String destinationSecretAccessKey;
+        private @Nullable String destinationProfile;
         private @Nullable String destinationEndpoint;
         private final @Nonnull List<String> include = new ArrayList<>();
         private final @Nonnull List<String> exclude = new ArrayList<>();
@@ -123,6 +130,11 @@ public class Project {
             return this;
         }
 
+        public @Nonnull Builder destinationProfile(final @Nonnull String destinationProfile) {
+            this.destinationProfile = destinationProfile;
+            return this;
+        }
+
         public @Nonnull Builder destinationEndpoint(final @Nonnull String destinationEndpoint) {
             this.destinationEndpoint = destinationEndpoint;
             return this;
@@ -153,6 +165,9 @@ public class Project {
             if (destinationRegion == null) {
                 throw new IllegalStateException("Pole 'destinationRegion' jest wymagane");
             }
+            if (destinationProfile == null && (destinationAccessKeyId == null || destinationSecretAccessKey == null)) {
+                throw new IllegalStateException("Pole 'destinationProfile' jest wymagane lub destinationAccessKeyId, destinationSecretAccessKey jest wymagane.");
+            }
             if (destinationAccessKeyId == null) {
                 throw new IllegalStateException("Pole 'destinationAccessKeyId' jest wymagane");
             }
@@ -163,9 +178,18 @@ public class Project {
                 throw new IllegalStateException("Pole 'destinationEndpoint' jest wymagane");
             }
 
-            return new Project(id, source, destinationBucket, destinationRegion,
-                destinationAccessKeyId, destinationSecretAccessKey,
-                destinationEndpoint, include, exclude);
+            return new Project(
+                id,
+                source,
+                destinationBucket,
+                destinationRegion,
+                destinationAccessKeyId,
+                destinationSecretAccessKey,
+                destinationProfile,
+                destinationEndpoint,
+                include,
+                exclude
+            );
         }
     }
 }

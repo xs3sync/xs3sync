@@ -15,6 +15,7 @@ record ProjectYml(
         @Nullable String region,
         @Nullable String accessKeyId,
         @Nullable String secretAccessKey,
+        @Nullable String profile,
         @Nullable String endpoint
     ) {
     }

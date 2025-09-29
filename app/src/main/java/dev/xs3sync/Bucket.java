@@ -2,6 +2,7 @@ package dev.xs3sync;
 
 import jakarta.annotation.Nonnull;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -13,16 +14,24 @@ import java.io.InputStream;
 import java.util.List;
 
 public class Bucket {
-    private final @Nonnull S3Client s3Client;
     private final @Nonnull String name;
+    private final @Nonnull S3Client client;
 
-    public Bucket(
-        final @Nonnull String bucketName,
+    private Bucket(
+        final @Nonnull String name,
+        final @Nonnull S3Client client
+    ) {
+        this.name = name;
+        this.client = client;
+    }
+
+    public static @Nonnull Bucket createWithBasicCredentials(
+        final @Nonnull String name,
         final @Nonnull String region,
         final @Nonnull String accessKey,
         final @Nonnull String secretKey
     ) {
-        this.s3Client = S3Client.builder()
+        final S3Client client = S3Client.builder()
             .region(Region.of(region))
             .credentialsProvider(
                 StaticCredentialsProvider.create(
@@ -31,7 +40,20 @@ public class Bucket {
             )
             .build();
 
-        this.name = bucketName;
+        return new Bucket(name, client);
+    }
+
+    public static @Nonnull Bucket createWithProfileCredentials(
+        final @Nonnull String name,
+        final @Nonnull String region,
+        final @Nonnull String profile
+    ) {
+        final S3Client client = S3Client.builder()
+            .region(Region.of(region))
+            .credentialsProvider(ProfileCredentialsProvider.create(profile))
+            .build();
+
+        return new Bucket(name, client);
     }
 
     public void putObject(
@@ -44,7 +66,7 @@ public class Bucket {
             .key(key)
             .build();
 
-        s3Client.putObject(request, RequestBody.fromInputStream(inputStream, contentLength));
+        client.putObject(request, RequestBody.fromInputStream(inputStream, contentLength));
     }
 
     public @Nonnull List<S3Object> listObjects() {
@@ -52,8 +74,18 @@ public class Bucket {
             .bucket(name)
             .build();
 
-        return s3Client.listObjectsV2(request).contents();
+        return client.listObjectsV2(request).contents();
     }
+
+    // public @Nonnull InputStream getInputStream(final @Nonnull String path) {
+    //     GetObjectRequest request = GetObjectRequest.builder()
+    //         .bucket(bucketName)
+    //         .key(path)
+    //         .build();
+
+    //     ResponseInputStream<GetObjectResponse> response = s3Client.getObject(request);
+    //     return response; // ResponseInputStream jest InputStreamem
+    // }
 
     public @Nonnull ResponseInputStream<GetObjectResponse> getObject(final @Nonnull String key) {
         final GetObjectRequest request = GetObjectRequest.builder()
@@ -61,10 +93,10 @@ public class Bucket {
             .key(key)
             .build();
 
-        return s3Client.getObject(request);
+        return client.getObject(request);
     }
 
     public void close() {
-        s3Client.close();
+        client.close();
     }
 }
