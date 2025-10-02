@@ -1,5 +1,5 @@
 package dev.xs3sync.storage;
 
-enum StorageItemState {
+public enum StorageItemState {
     synced, deleted
 }

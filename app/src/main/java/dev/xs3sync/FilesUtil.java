@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
@@ -39,7 +40,7 @@ public class FilesUtil {
         }
     }
 
-    public long size(final @Nonnull Path path) {
+    public long getSize(final @Nonnull Path path) {
         try {
             if (!Files.exists(path)) {
                 throw new IllegalArgumentException("File does not exist: " + path);
@@ -72,6 +73,22 @@ public class FilesUtil {
             Files.copy(inputStream, target, options);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void delete(final @Nonnull Path path) {
+        try {
+            if (Files.notExists(path)) {
+                throw new IllegalArgumentException("File does not exist: " + path);
+            }
+            if (Files.isDirectory(path)) {
+                try (Stream<Path> entries = Files.list(path)) {
+                    entries.forEach(this::delete);
+                }
+            }
+            Files.delete(path);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete: " + path, e);
         }
     }
 
@@ -157,5 +174,21 @@ public class FilesUtil {
             }
         }
         return Path.of(name);
+    }
+
+    public @Nonnull Long getLastModifiedTime(final @Nonnull Path file) {
+        try {
+            return Files.getLastModifiedTime(file).toMillis();
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot read last modified time for: " + file, e);
+        }
+    }
+
+    public void setLastModifiedTime(final @Nonnull Path path, final long time) {
+        try {
+            Files.setLastModifiedTime(path, FileTime.fromMillis(time));
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot set last modified time for: " + path, e);
+        }
     }
 }

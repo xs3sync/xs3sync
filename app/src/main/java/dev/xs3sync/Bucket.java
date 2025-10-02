@@ -10,8 +10,11 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
+import java.io.FilterInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Bucket {
     private final @Nonnull String name;
@@ -66,7 +69,45 @@ public class Bucket {
             .key(key)
             .build();
 
-        client.putObject(request, RequestBody.fromInputStream(inputStream, contentLength));
+        final InputStream countingStream = new FilterInputStream(inputStream) {
+            private final AtomicLong bytesRead = new AtomicLong(0);
+            private final int barWidth = 50;
+
+            @Override
+            public int read() throws IOException {
+                int b = super.read();
+                if (b != -1) {
+                    updateProgress(1);
+                }
+                return b;
+            }
+
+            @Override
+            public int read(byte[] b, int off, int len) throws IOException {
+                int n = super.read(b, off, len);
+                if (n > 0) {
+                    updateProgress(n);
+                }
+                return n;
+            }
+
+            private void updateProgress(int n) {
+                long totalRead = bytesRead.addAndGet(n);
+                double progress = (double) totalRead / contentLength;
+                int filled = (int) (progress * barWidth);
+
+                StringBuilder bar = new StringBuilder();
+                bar.append("\r %s[".formatted(key));
+                for (int i = 0; i < barWidth; i++) {
+                    bar.append(i < filled ? '=' : ' ');
+                }
+                bar.append("] ");
+                bar.append(String.format("%.2f%%", progress * 100));
+                System.out.print(bar);
+            }
+        };
+
+        client.putObject(request, RequestBody.fromInputStream(countingStream, contentLength));
     }
 
     public @Nonnull List<S3Object> listObjects() {
@@ -86,6 +127,27 @@ public class Bucket {
     //     ResponseInputStream<GetObjectResponse> response = s3Client.getObject(request);
     //     return response; // ResponseInputStream jest InputStreamem
     // }
+
+    public void move(
+        final @Nonnull String key,
+        final @Nonnull String newKey
+    ) {
+        final CopyObjectRequest copyRequest = CopyObjectRequest.builder()
+            .sourceBucket(name)
+            .sourceKey(key)
+            .destinationBucket(name)
+            .destinationKey(newKey)
+            .build();
+
+        client.copyObject(copyRequest);
+
+        final DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+            .bucket(name)
+            .key(key)
+            .build();
+
+        client.deleteObject(deleteRequest);
+    }
 
     public @Nonnull ResponseInputStream<GetObjectResponse> getObject(final @Nonnull String key) {
         final GetObjectRequest request = GetObjectRequest.builder()

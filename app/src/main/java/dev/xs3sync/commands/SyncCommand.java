@@ -36,7 +36,8 @@ final class SyncCommand extends BaseCommand {
             final SyncService syncService = new SyncService(
                 Path.of(project.getSource()),
                 Services.filesUtil(),
-                bucket
+                bucket,
+                Services.storageUtil()
             );
 
             syncService.sync();
