@@ -3,7 +3,9 @@ package dev.xs3sync.workspace;
 import dev.xs3sync.FilesUtil;
 import dev.xs3sync.PathUtil;
 import dev.xs3sync.YamlMapper;
+import dev.xs3sync.project.Project;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -51,39 +53,51 @@ public class Workspace {
         final @Nonnull FilesUtil fileUtil,
         final @Nonnull PathUtil pathUtil
     ) {
-        final ProjectYml projectYml = yamlMapper.readValue(projectPath.toFile(), ProjectYml.class);
+        final WorkspaceProjectYml workspaceProjectYml = yamlMapper.readValue(projectPath.toFile(), WorkspaceProjectYml.class);
         final Project.Builder builder = Project.builder();
 
         builder.id(fileUtil.getFileName(projectPath, true).toString());
 
-        if (projectYml.source() != null)
-            builder.source(pathUtil.expand(Path.of(projectYml.source())).toString());
+        @Nullable String source = null;
 
-        if (projectYml.destination() != null) {
-            if (projectYml.destination().bucket() != null)
-                builder.destinationBucket(projectYml.destination().bucket());
-
-            if (projectYml.destination().region() != null)
-                builder.destinationRegion(projectYml.destination().region());
-
-            if (projectYml.destination().accessKeyId() != null)
-                builder.destinationAccessKeyId(projectYml.destination().accessKeyId());
-
-            if (projectYml.destination().secretAccessKey() != null)
-                builder.destinationSecretAccessKey(projectYml.destination().secretAccessKey());
-
-            if (projectYml.destination().profile() != null)
-                builder.destinationProfile(projectYml.destination().profile());
-
-            if (projectYml.destination().endpoint() != null)
-                builder.destinationEndpoint(projectYml.destination().endpoint());
+        if (workspaceProjectYml.source() != null) {
+            source = pathUtil.expand(Path.of(workspaceProjectYml.source())).toString();
+            builder.source(source);
         }
 
-        if (projectYml.include() != null)
-            builder.include(projectYml.include());
+        if (workspaceProjectYml.destination() != null) {
+            if (workspaceProjectYml.destination().bucket() != null)
+                builder.destinationBucket(workspaceProjectYml.destination().bucket());
 
-        if (projectYml.exclude() != null)
-            builder.exclude(projectYml.exclude());
+            if (workspaceProjectYml.destination().region() != null)
+                builder.destinationRegion(workspaceProjectYml.destination().region());
+
+            if (workspaceProjectYml.destination().accessKeyId() != null)
+                builder.destinationAccessKeyId(workspaceProjectYml.destination().accessKeyId());
+
+            if (workspaceProjectYml.destination().secretAccessKey() != null)
+                builder.destinationSecretAccessKey(workspaceProjectYml.destination().secretAccessKey());
+
+            if (workspaceProjectYml.destination().profile() != null)
+                builder.destinationProfile(workspaceProjectYml.destination().profile());
+
+            if (workspaceProjectYml.destination().endpoint() != null)
+                builder.destinationEndpoint(workspaceProjectYml.destination().endpoint());
+        }
+
+        if (workspaceProjectYml.include() != null)
+            builder.include(workspaceProjectYml.include());
+
+        if (workspaceProjectYml.exclude() != null)
+            builder.exclude(workspaceProjectYml.exclude());
+
+        if (source != null) {
+            final Path sourceXs3sync = Path.of(source, ".xs3sync");
+
+            if (!fileUtil.exists(sourceXs3sync)) {
+                fileUtil.createDirectories(sourceXs3sync);
+            }
+        }
 
         return builder.build();
     }

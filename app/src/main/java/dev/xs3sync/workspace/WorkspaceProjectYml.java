@@ -4,12 +4,16 @@ import jakarta.annotation.Nullable;
 
 import java.util.List;
 
-record ProjectYml(
+record WorkspaceProjectYml(
     @Nullable String source,
     @Nullable DestinationYml destination,
     @Nullable List<String> include,
     @Nullable List<String> exclude
 ) {
+    public record SourceYml(
+        @Nullable String path
+    ) {
+    }
     public record DestinationYml(
         @Nullable String bucket,
         @Nullable String region,

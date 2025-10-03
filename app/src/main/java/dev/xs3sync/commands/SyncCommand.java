@@ -3,7 +3,7 @@ package dev.xs3sync.commands;
 import dev.xs3sync.Bucket;
 import dev.xs3sync.Services;
 import dev.xs3sync.SyncService;
-import dev.xs3sync.workspace.Project;
+import dev.xs3sync.project.Project;
 import jakarta.annotation.Nullable;
 import picocli.CommandLine.Command;
 

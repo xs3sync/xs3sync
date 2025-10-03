@@ -10,13 +10,13 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import java.nio.file.Path;
 import java.util.List;
 
-public class SyncService {
+public class FetchService {
     private final @Nonnull Path path;
     private final @Nonnull FilesUtil filesUtil;
     private final @Nonnull Bucket bucket;
     private final @Nonnull StorageUtil storageUtil;
 
-    public SyncService(
+    public FetchService(
         final @Nonnull Path path,
         final @Nonnull FilesUtil filesUtil,
         final @Nonnull Bucket bucket,
