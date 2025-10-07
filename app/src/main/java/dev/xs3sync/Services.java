@@ -1,5 +1,6 @@
 package dev.xs3sync;
 
+import dev.xs3sync.init.InitService;
 import dev.xs3sync.storage.StorageUtil;
 import dev.xs3sync.workspace.Workspace;
 import jakarta.annotation.Nonnull;
@@ -7,17 +8,28 @@ import jakarta.annotation.Nullable;
 
 @SuppressWarnings("ALL")
 public class Services {
-    private static @Nullable Workspace workspace = null;
-    private static @Nullable PathUtil pathUtil = null;
-    private static @Nullable FilesUtil filesUtil = null;
-    private static @Nullable YamlMapper yamlMapper = null;
-    private static @Nullable StorageUtil storageUtil = null;
+    private final @Nonnull String workingDirectory;
+    private @Nullable Workspace workspace = null;
+    private @Nullable PathUtil pathUtil = null;
+    private @Nullable FilesUtil filesUtil = null;
+    private @Nullable YamlMapper yamlMapper = null;
+    private @Nullable JsonMapper jsonMapper = null;
+    private @Nullable StorageUtil storageUtil = null;
+    private @Nullable InitService initService = null;
 
-    public synchronized static void setWorkspace(final @Nonnull Workspace workspace) {
-        Services.workspace = workspace;
+    public Services(final @Nonnull String workingDirectory) {
+        this.workingDirectory = workingDirectory;
     }
 
-    public synchronized static @Nonnull Workspace workspace() {
+    public @Nonnull String workingDirectory() {
+        return this.workingDirectory;
+    }
+
+    public synchronized void setWorkspace(final @Nonnull Workspace workspace) {
+        this.workspace = workspace;
+    }
+
+    public synchronized @Nonnull Workspace workspace() {
         if (workspace == null) {
             throw new IllegalStateException("Workspace not initialized yet.");
         }
@@ -25,7 +37,7 @@ public class Services {
         return workspace;
     }
 
-    public synchronized static @Nonnull PathUtil pathUtil() {
+    public synchronized @Nonnull PathUtil pathUtil() {
         if (pathUtil == null) {
             pathUtil = new PathUtil();
         }
@@ -33,7 +45,7 @@ public class Services {
         return pathUtil;
     }
 
-    public synchronized static @Nonnull FilesUtil filesUtil() {
+    public synchronized @Nonnull FilesUtil filesUtil() {
         if (filesUtil == null) {
             filesUtil = new FilesUtil();
         }
@@ -41,7 +53,7 @@ public class Services {
         return filesUtil;
     }
 
-    public synchronized static @Nonnull YamlMapper yamlMapper() {
+    public synchronized @Nonnull YamlMapper yamlMapper() {
         if (yamlMapper == null) {
             yamlMapper = new YamlMapper();
         }
@@ -49,11 +61,31 @@ public class Services {
         return yamlMapper;
     }
 
-    public synchronized static @Nonnull StorageUtil storageUtil() {
+    public synchronized @Nonnull JsonMapper jsonMapper() {
+        if (jsonMapper == null) {
+            jsonMapper = new JsonMapper();
+        }
+
+        return jsonMapper;
+    }
+
+    public synchronized @Nonnull StorageUtil storageUtil() {
         if (storageUtil == null) {
             storageUtil = new StorageUtil();
         }
 
         return storageUtil;
+    }
+
+    public synchronized @Nonnull InitService initService() {
+        if (initService == null) {
+            initService = new InitService(
+                pathUtil(),
+                filesUtil(),
+                yamlMapper()
+            );
+        }
+
+        return initService;
     }
 }

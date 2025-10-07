@@ -54,51 +54,54 @@ public class Workspace {
         final @Nonnull PathUtil pathUtil
     ) {
         final WorkspaceProjectYml workspaceProjectYml = yamlMapper.readValue(projectPath.toFile(), WorkspaceProjectYml.class);
-        final Project.Builder builder = Project.builder();
 
-        builder.id(fileUtil.getFileName(projectPath, true).toString());
+        System.out.printf("test");
+        // final Project.Builder builder = Project.builder();
 
-        @Nullable String source = null;
+        // builder.id(fileUtil.getFileName(projectPath, true).toString());
 
-        if (workspaceProjectYml.source() != null) {
-            source = pathUtil.expand(Path.of(workspaceProjectYml.source())).toString();
-            builder.source(source);
-        }
+        // @Nullable String source = null;
 
-        if (workspaceProjectYml.destination() != null) {
-            if (workspaceProjectYml.destination().bucket() != null)
-                builder.destinationBucket(workspaceProjectYml.destination().bucket());
+        // if (workspaceProjectYml.source() != null) {
+        //     source = pathUtil.expand(Path.of(workspaceProjectYml.source())).toString();
+        //     builder.source(source);
+        // }
 
-            if (workspaceProjectYml.destination().region() != null)
-                builder.destinationRegion(workspaceProjectYml.destination().region());
+        // if (workspaceProjectYml.destination() != null) {
+        //     if (workspaceProjectYml.destination().bucket() != null)
+        //         builder.destinationBucket(workspaceProjectYml.destination().bucket());
 
-            if (workspaceProjectYml.destination().accessKeyId() != null)
-                builder.destinationAccessKeyId(workspaceProjectYml.destination().accessKeyId());
+        //     if (workspaceProjectYml.destination().region() != null)
+        //         builder.destinationRegion(workspaceProjectYml.destination().region());
 
-            if (workspaceProjectYml.destination().secretAccessKey() != null)
-                builder.destinationSecretAccessKey(workspaceProjectYml.destination().secretAccessKey());
+        //     if (workspaceProjectYml.destination().accessKeyId() != null)
+        //         builder.destinationAccessKeyId(workspaceProjectYml.destination().accessKeyId());
 
-            if (workspaceProjectYml.destination().profile() != null)
-                builder.destinationProfile(workspaceProjectYml.destination().profile());
+        //     if (workspaceProjectYml.destination().secretAccessKey() != null)
+        //         builder.destinationSecretAccessKey(workspaceProjectYml.destination().secretAccessKey());
 
-            if (workspaceProjectYml.destination().endpoint() != null)
-                builder.destinationEndpoint(workspaceProjectYml.destination().endpoint());
-        }
+        //     if (workspaceProjectYml.destination().profile() != null)
+        //         builder.destinationProfile(workspaceProjectYml.destination().profile());
 
-        if (workspaceProjectYml.include() != null)
-            builder.include(workspaceProjectYml.include());
+        //     if (workspaceProjectYml.destination().endpoint() != null)
+        //         builder.destinationEndpoint(workspaceProjectYml.destination().endpoint());
+        // }
 
-        if (workspaceProjectYml.exclude() != null)
-            builder.exclude(workspaceProjectYml.exclude());
+        // if (workspaceProjectYml.include() != null)
+        //     builder.include(workspaceProjectYml.include());
 
-        if (source != null) {
-            final Path sourceXs3sync = Path.of(source, ".xs3sync");
+        // if (workspaceProjectYml.exclude() != null)
+        //     builder.exclude(workspaceProjectYml.exclude());
 
-            if (!fileUtil.exists(sourceXs3sync)) {
-                fileUtil.createDirectories(sourceXs3sync);
-            }
-        }
+        // if (source != null) {
+        //     final Path sourceXs3sync = Path.of(source, ".xs3sync");
 
-        return builder.build();
+        //     if (!fileUtil.exists(sourceXs3sync)) {
+        //         fileUtil.createDirectories(sourceXs3sync);
+        //     }
+        // }
+
+        // return builder.build();
+        return null;
     }
 }

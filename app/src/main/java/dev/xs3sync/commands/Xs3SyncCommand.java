@@ -13,6 +13,7 @@ public class Xs3SyncCommand extends BaseCommand {
 
     public static void main(String[] args) {
         final CommandLine cmd = new CommandLine(new Xs3SyncCommand());
+        cmd.addSubcommand("init", new InitCommand());
         cmd.addSubcommand("sync", new SyncCommand());
         cmd.execute(args);
     }

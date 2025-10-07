@@ -1,24 +1,41 @@
 package dev.xs3sync.commands;
 
-import dev.xs3sync.Bucket;
-import dev.xs3sync.Services;
-import dev.xs3sync.SyncService;
-import dev.xs3sync.project.Project;
-import jakarta.annotation.Nullable;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
-import java.nio.file.Path;
-
 @Command(
-    name = "sync",
-    description = "Synchronizuje pliki między lokalnym a S3"
+    name = "init",
+    description = "Inicjuje katalog do synchronizacji"
 )
-final class SyncCommand extends BaseCommand {
+final class InitCommand extends BaseCommand {
+
+    @CommandLine.Option(names = {"--bucket"}, required = true)
+    private String bucket;
+
+    @CommandLine.Option(names = {"--region"}, required = true)
+    private String region;
+
+    @CommandLine.Option(names = {"--access-key-id"})
+    private String accessKeyId;
+
+    @CommandLine.Option(names = {"--secret-access-key"})
+    private String secretAccessKey;
+
+    @CommandLine.Option(names = {"--profile"})
+    private String profile;
+
+    @CommandLine.Option(names = {"--endpoint"})
+    private String endpoint;
 
     @Override
     public void run() {
         init();
 
+        services.initService().init(
+            services.workingDirectory()
+        );
+
+        // services.initService().init();
         // for (final Project project : workspace.getProjects()) {
         //     final String destinationRegion = project.getDestinationRegion();
         //     final @Nullable String destinationProfile = project.getDestinationProfile();

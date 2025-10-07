@@ -19,9 +19,16 @@ public class YamlMapper {
         final @Nonnull File src,
         final @Nonnull Class<T> valueType
     ) {
-
         try {
             return mapper.readValue(src, valueType);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public <T> void write(final @Nonnull T data, final @Nonnull String path) {
+        try {
+            mapper.writeValue(new File(path), data);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
