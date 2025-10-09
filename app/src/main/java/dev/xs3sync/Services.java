@@ -1,5 +1,6 @@
 package dev.xs3sync;
 
+import dev.xs3sync.fetch.FetchService;
 import dev.xs3sync.init.InitService;
 import dev.xs3sync.storage.StorageUtil;
 import dev.xs3sync.workspace.Workspace;
@@ -16,6 +17,7 @@ public class Services {
     private @Nullable JsonMapper jsonMapper = null;
     private @Nullable StorageUtil storageUtil = null;
     private @Nullable InitService initService = null;
+    private @Nullable FetchService fetchService = null;
 
     public Services(final @Nonnull String workingDirectory) {
         this.workingDirectory = workingDirectory;
@@ -87,5 +89,13 @@ public class Services {
         }
 
         return initService;
+    }
+
+    public synchronized @Nonnull FetchService fetchService() {
+        if (fetchService == null) {
+            fetchService = new FetchService();
+        }
+
+        return fetchService;
     }
 }

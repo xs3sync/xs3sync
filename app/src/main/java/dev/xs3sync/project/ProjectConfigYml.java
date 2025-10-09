@@ -4,14 +4,8 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 public record ProjectConfigYml(
-    @Nonnull SourceYml source,
     @Nonnull DestinationYml destination
 ) {
-    public record SourceYml(
-        @Nullable String path
-    ) {
-    }
-
     public record DestinationYml(
         @Nonnull String bucket,
         @Nonnull String region,

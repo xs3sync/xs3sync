@@ -1,39 +1,50 @@
 package dev.xs3sync.commands;
 
-import picocli.CommandLine;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
+@SuppressWarnings({"NotNullFieldNotInitialized", "unused"})
 @Command(
     name = "init",
     description = "Inicjuje katalog do synchronizacji"
 )
 final class InitCommand extends BaseCommand {
 
-    @CommandLine.Option(names = {"--bucket"}, required = true)
-    private String bucket;
+    @Option(names = {"--bucket"}, required = true)
+    private @Nonnull String bucket;
 
-    @CommandLine.Option(names = {"--region"}, required = true)
-    private String region;
+    @Option(names = {"--region"}, required = true)
+    private @Nonnull String region;
 
-    @CommandLine.Option(names = {"--access-key-id"})
-    private String accessKeyId;
+    @Option(names = {"--access-key-id"})
+    private @Nullable String accessKeyId;
 
-    @CommandLine.Option(names = {"--secret-access-key"})
-    private String secretAccessKey;
+    @Option(names = {"--secret-access-key"})
+    private @Nullable String secretAccessKey;
 
-    @CommandLine.Option(names = {"--profile"})
-    private String profile;
+    @Option(names = {"--profile"})
+    private @Nullable String profile;
 
-    @CommandLine.Option(names = {"--endpoint"})
-    private String endpoint;
+    @Option(names = {"--endpoint"})
+    private @Nullable String endpoint;
 
     @Override
     public void run() {
         init();
 
         services.initService().init(
-            services.workingDirectory()
+            services.workingDirectory(),
+            bucket,
+            region,
+            accessKeyId,
+            secretAccessKey,
+            profile,
+            endpoint
         );
+
+        // services.fetchService().fetch();
 
         // services.initService().init();
         // for (final Project project : workspace.getProjects()) {

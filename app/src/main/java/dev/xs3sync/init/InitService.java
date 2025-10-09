@@ -3,8 +3,9 @@ package dev.xs3sync.init;
 import dev.xs3sync.FilesUtil;
 import dev.xs3sync.PathUtil;
 import dev.xs3sync.YamlMapper;
-import dev.xs3sync.project.ProjectConfigYml;
+import dev.xs3sync.project.Project;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,42 +13,61 @@ import java.nio.file.Paths;
 public class InitService {
     final @Nonnull PathUtil pathUtil;
     final @Nonnull FilesUtil fileUtil;
-    final @Nonnull YamlMapper yamlMappe;
+    final @Nonnull YamlMapper yamlMapper;
 
     public InitService(
         final @Nonnull PathUtil pathUtil,
         final @Nonnull FilesUtil fileUtil,
-        final @Nonnull YamlMapper yamlMappe
+        final @Nonnull YamlMapper yamlMapper
     ) {
         this.pathUtil = pathUtil;
         this.fileUtil = fileUtil;
-        this.yamlMappe = yamlMappe;
+        this.yamlMapper = yamlMapper;
     }
 
-    public void init(final @Nonnull String workingDirectory) {
+    public void init(
+        final @Nonnull String workingDirectory,
+        final @Nonnull String bucket,
+        final @Nonnull String region,
+        final @Nullable String accessKeyId,
+        final @Nullable String secretAccessKey,
+        final @Nullable String profile,
+        final @Nullable String endpoint
+    ) {
         final Path xs3syncPath = Paths.get(workingDirectory).resolve(".xs3sync");
 
         if (fileUtil.exists(xs3syncPath)) {
             throw new RuntimeException("The xs3sync repository already exists at: " + xs3syncPath);
         }
 
-        fileUtil.createDirectories(xs3syncPath);
+        final Project.Builder builder = Project.builder();
+        builder.setSourcePath(xs3syncPath.getParent().toString());
 
-        // creating project directory ----------------------------------------------------------------------------------
-        final Path configPath = xs3syncPath.resolve(xs3syncPath.resolve("config.yaml"));
+        if (profile != null) {
+            builder.setDestination(bucket, region, profile);
+        } else {
+            // throw new RuntimeException("Either profile or access keys must be provided");
+        }
 
-        final ProjectConfigYml configYml = new ProjectConfigYml(
-            new ProjectConfigYml.SourceYml("xs3sync project configuration file"),
-            new ProjectConfigYml.DestinationYml(
-                "handy-1c6966d6-9bb4-11f0-8de9-0242ac120002",
-                "eu-central-1",
-                "key",
-                "secret",
-                "pawel-bobryk",
-                "endpoint"
-            )
-        );
+        final Project project = builder.build();
 
-        yamlMappe.write(configYml, configPath.toString());
+        System.out.printf("test");
+        // fileUtil.createDirectories(xs3syncPath);
+
+        // // creating project directory ----------------------------------------------------------------------------------
+        // final Path configPath = xs3syncPath.resolve(xs3syncPath.resolve("config.yaml"));
+
+        // final ProjectConfigYml configYml = new ProjectConfigYml(
+        //     new ProjectConfigYml.DestinationYml(
+        //         bucket,
+        //         region,
+        //         accessKeyId,
+        //         secretAccessKey,
+        //         profile,
+        //         endpoint
+        //     )
+        // );
+
+        // yamlMapper.write(configYml, configPath.toString());
     }
 }
