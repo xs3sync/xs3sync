@@ -155,6 +155,20 @@ public class FilesUtil {
         }
     }
 
+    public boolean isEmpty(final @Nonnull Path path) {
+        try {
+            if (Files.isDirectory(path)) {
+                try (Stream<Path> entries = Files.list(path)) {
+                    return entries.findFirst().isEmpty();
+                }
+            } else {
+                return Files.size(path) == 0;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to check if path is empty: " + path, e);
+        }
+    }
+
     public @Nonnull Path getFileName(final @Nonnull Path path) {
         return getFileName(path, false);
     }

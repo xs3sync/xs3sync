@@ -36,6 +36,19 @@ public class StorageUtil {
         return new DecodedKey(path, modifiedAt, state);
     }
 
+    public @Nonnull String getStorageItemKey(
+        final @Nonnull StorageItem item
+    ) {
+        return String.format("%s.%d.%s", item.path(), item.modificationAt(), item.state().name());
+    }
+
+    public @Nonnull String getStorageItemKey(
+        final @Nonnull StorageItem item,
+        final @Nonnull StorageItemState state
+    ) {
+        return String.format("%s.%d.%s", item.path(), item.modificationAt(), state.name());
+    }
+
     public record DecodedKey(
         @Nonnull String path,
         @Nonnull Long modifiedAt,

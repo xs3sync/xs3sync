@@ -7,10 +7,10 @@ import picocli.CommandLine.Option;
 
 @SuppressWarnings({"NotNullFieldNotInitialized", "unused"})
 @Command(
-    name = "init",
+    name = "fetch",
     description = "Inicjuje katalog do synchronizacji"
 )
-final class InitCommand extends BaseCommand {
+final class FetchCommand extends BaseCommand {
 
     @Option(names = {"--bucket"}, required = true)
     private @Nonnull String bucket;
@@ -34,7 +34,7 @@ final class InitCommand extends BaseCommand {
     public void run() {
         init();
 
-        services.initService().init(
+        services.fetchService().fetch(
             services.workingDirectory(),
             bucket,
             region,
