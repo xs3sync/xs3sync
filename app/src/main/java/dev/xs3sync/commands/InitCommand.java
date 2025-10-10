@@ -43,32 +43,5 @@ final class InitCommand extends BaseCommand {
             profile,
             endpoint
         );
-
-        // services.fetchService().fetch();
-
-        // services.initService().init();
-        // for (final Project project : workspace.getProjects()) {
-        //     final String destinationRegion = project.getDestinationRegion();
-        //     final @Nullable String destinationProfile = project.getDestinationProfile();
-
-        //     if (destinationProfile == null) {
-        //         throw new IllegalArgumentException("Destination profile of project %s is not set".formatted(project.getId()));
-        //     }
-
-        //     final Bucket bucket = Bucket.createWithProfileCredentials(
-        //         project.getDestinationBucket(),
-        //         destinationRegion,
-        //         destinationProfile
-        //     );
-
-        //     final SyncService syncService = new SyncService(
-        //         Path.of(project.getSource()),
-        //         Services.filesUtil(),
-        //         bucket,
-        //         Services.storageUtil()
-        //     );
-
-        //     syncService.sync();
-        // }
     }
 }

@@ -7,30 +7,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Project {
-    private final @Nonnull ProjectSource source;
-    private final @Nonnull ProjectDestination destination;
-    private final @Nonnull List<String> include;
-    private final @Nonnull List<String> exclude;
+    final @Nonnull String path;
+    final @Nonnull Destination destination;
+    final @Nonnull List<String> include;
+    final @Nonnull List<String> exclude;
 
     public Project(
-        final @Nonnull ProjectSource source,
-        final @Nonnull ProjectDestination destination,
+        final @Nonnull String path,
+        final @Nonnull Destination destination,
         final @Nonnull List<String> include,
         final @Nonnull List<String> exclude
     ) {
-        this.source = source;
+        this.path = path;
         this.destination = destination;
         this.include = include;
         this.exclude = exclude;
     }
 
     // builder ---------------------------------------------------------------------------------------------------------
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(
+        final @Nonnull String path
+    ) {
+        return new Builder(path);
     }
 
     public static class Builder {
-        private @Nullable String sourcePath;
+        private final @Nonnull String path;
         private @Nullable String destinationBucket;
         private @Nullable String destinationRegion;
         private @Nullable String destinationAccessKeyId;
@@ -40,9 +42,8 @@ public class Project {
         private final @Nonnull List<String> include = new ArrayList<>();
         private final @Nonnull List<String> exclude = new ArrayList<>();
 
-        public @Nonnull Builder setSourcePath(final @Nonnull String path) {
-            this.sourcePath = path;
-            return this;
+        public Builder(final @Nonnull String path) {
+            this.path = path;
         }
 
         public @Nonnull Builder setDestination(
@@ -69,9 +70,6 @@ public class Project {
         }
 
         public @Nonnull Project build() {
-            if (sourcePath == null) {
-                throw new IllegalStateException("Pole 'source.path' jest nieustawione" );
-            }
             if (destinationBucket == null) {
                 throw new IllegalStateException("Pole 'destination.bucket' jest wymagane");
             }
@@ -83,8 +81,8 @@ public class Project {
             }
 
             return new Project(
-                new ProjectSource(sourcePath),
-                new ProjectDestination(
+                path,
+                new Destination(
                     destinationBucket,
                     destinationRegion,
                     destinationAccessKeyId,
@@ -95,6 +93,58 @@ public class Project {
                 include,
                 exclude
             );
+        }
+    }
+
+    /**
+     * Destination configuration for the project.
+     */
+    public static class Destination {
+        final @Nonnull String bucket;
+        final @Nonnull String region;
+        final @Nullable String accessKeyId;
+        final @Nullable String secretAccessKey;
+        final @Nullable String profile;
+        final @Nullable String endpoint;
+
+        public Destination(
+            final @Nonnull String bucket,
+            final @Nonnull String region,
+            final @Nullable String accessKeyId,
+            final @Nullable String secretAccessKey,
+            final @Nullable String profile,
+            final @Nullable String endpoint
+        ) {
+            this.bucket = bucket;
+            this.region = region;
+            this.accessKeyId = accessKeyId;
+            this.secretAccessKey = secretAccessKey;
+            this.profile = profile;
+            this.endpoint = endpoint;
+        }
+
+        public @Nonnull String getBucket() {
+            return bucket;
+        }
+
+        public @Nonnull String getRegion() {
+            return region;
+        }
+
+        public @Nullable String getAccessKeyId() {
+            return accessKeyId;
+        }
+
+        public @Nullable String getSecretAccessKey() {
+            return secretAccessKey;
+        }
+
+        public @Nullable String getProfile() {
+            return profile;
+        }
+
+        public @Nullable String getEndpoint() {
+            return endpoint;
         }
     }
 }

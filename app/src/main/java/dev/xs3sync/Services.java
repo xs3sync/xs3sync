@@ -2,6 +2,7 @@ package dev.xs3sync;
 
 import dev.xs3sync.fetch.FetchService;
 import dev.xs3sync.init.InitService;
+import dev.xs3sync.project.ProjectRepository;
 import dev.xs3sync.storage.StorageUtil;
 import dev.xs3sync.workspace.Workspace;
 import jakarta.annotation.Nonnull;
@@ -18,6 +19,7 @@ public class Services {
     private @Nullable StorageUtil storageUtil = null;
     private @Nullable InitService initService = null;
     private @Nullable FetchService fetchService = null;
+    private @Nullable ProjectRepository projectRepository = null;
 
     public Services(final @Nonnull String workingDirectory) {
         this.workingDirectory = workingDirectory;
@@ -84,7 +86,8 @@ public class Services {
             initService = new InitService(
                 pathUtil(),
                 filesUtil(),
-                yamlMapper()
+                yamlMapper(),
+                projectRepository()
             );
         }
 
@@ -97,5 +100,18 @@ public class Services {
         }
 
         return fetchService;
+    }
+
+    public synchronized @Nonnull ProjectRepository projectRepository() {
+        if (projectRepository == null) {
+            projectRepository = new ProjectRepository(
+                workingDirectory,
+                pathUtil(),
+                filesUtil(),
+                yamlMapper()
+            );
+        }
+
+        return projectRepository;
     }
 }
