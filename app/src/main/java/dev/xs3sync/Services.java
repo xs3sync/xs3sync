@@ -1,44 +1,32 @@
 package dev.xs3sync;
 
-import dev.xs3sync.fetch.FetchService;
+import dev.xs3sync.init.FetchService;
 import dev.xs3sync.init.InitService;
 import dev.xs3sync.project.ProjectRepository;
 import dev.xs3sync.storage.StorageUtil;
-import dev.xs3sync.workspace.Workspace;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+
+import java.nio.file.Path;
 
 @SuppressWarnings("ALL")
 public class Services {
     private final @Nonnull String workingDirectory;
-    private @Nullable Workspace workspace = null;
     private @Nullable PathUtil pathUtil = null;
     private @Nullable FilesUtil filesUtil = null;
     private @Nullable YamlMapper yamlMapper = null;
-    private @Nullable JsonMapper jsonMapper = null;
     private @Nullable StorageUtil storageUtil = null;
+    private @Nullable ProjectRepository projectRepository = null;
     private @Nullable InitService initService = null;
     private @Nullable FetchService fetchService = null;
-    private @Nullable ProjectRepository projectRepository = null;
 
     public Services(final @Nonnull String workingDirectory) {
-        this.workingDirectory = workingDirectory;
+        this.pathUtil = new PathUtil();
+        this.workingDirectory = pathUtil.expand(Path.of(workingDirectory)).toString();
     }
 
     public @Nonnull String workingDirectory() {
         return this.workingDirectory;
-    }
-
-    public synchronized void setWorkspace(final @Nonnull Workspace workspace) {
-        this.workspace = workspace;
-    }
-
-    public synchronized @Nonnull Workspace workspace() {
-        if (workspace == null) {
-            throw new IllegalStateException("Workspace not initialized yet.");
-        }
-
-        return workspace;
     }
 
     public synchronized @Nonnull PathUtil pathUtil() {
@@ -65,14 +53,6 @@ public class Services {
         return yamlMapper;
     }
 
-    public synchronized @Nonnull JsonMapper jsonMapper() {
-        if (jsonMapper == null) {
-            jsonMapper = new JsonMapper();
-        }
-
-        return jsonMapper;
-    }
-
     public synchronized @Nonnull StorageUtil storageUtil() {
         if (storageUtil == null) {
             storageUtil = new StorageUtil();
@@ -87,7 +67,8 @@ public class Services {
                 pathUtil(),
                 filesUtil(),
                 yamlMapper(),
-                projectRepository()
+                projectRepository(),
+                initService()
             );
         }
 

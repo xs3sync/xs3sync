@@ -5,9 +5,9 @@ import dev.xs3sync.PathUtil;
 import dev.xs3sync.YamlMapper;
 import dev.xs3sync.project.ProjectYaml.DestinationYml;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 public class ProjectRepository {
 
@@ -15,8 +15,6 @@ public class ProjectRepository {
     private final @Nonnull PathUtil pathUtil;
     private final @Nonnull FilesUtil fileUtil;
     private final @Nonnull YamlMapper yamlMapper;
-
-    private @Nullable Project project = null;
 
     public ProjectRepository(
         final @Nonnull String workingDirectory,
@@ -46,10 +44,22 @@ public class ProjectRepository {
             throw new RuntimeException("The directory %s is not a xs3sync project.".formatted(workingDirectory));
         }
 
-        final Path projectYamlPath = pathUtil.expand(Path.of(workingDirectory)).resolve("project.yml");
+        final Path projectYamlPath = xs3syncPath.resolve("project.yml");
         final ProjectYaml projectYaml = yamlMapper.readValue(projectYamlPath.toFile(), ProjectYaml.class);
 
-        return null;
+        return new Project(
+            workingDirectory,
+            new Project.Destination(
+                projectYaml.destination().bucket(),
+                projectYaml.destination().region(),
+                projectYaml.destination().accessKeyId(),
+                projectYaml.destination().secretAccessKey(),
+                projectYaml.destination().profile(),
+                projectYaml.destination().endpoint()
+            ),
+            new ArrayList<>(),
+            new ArrayList<>()
+        );
     }
 
     public void create(final @Nonnull Project project) {

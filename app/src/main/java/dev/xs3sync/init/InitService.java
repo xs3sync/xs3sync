@@ -13,17 +13,20 @@ public class InitService {
     final @Nonnull FilesUtil fileUtil;
     final @Nonnull YamlMapper yamlMapper;
     final @Nonnull ProjectRepository projectRepository;
+    final @Nonnull FetchService fetchService;
 
     public InitService(
         final @Nonnull PathUtil pathUtil,
         final @Nonnull FilesUtil fileUtil,
         final @Nonnull YamlMapper yamlMapper,
-        final @Nonnull ProjectRepository projectRepository
+        final @Nonnull ProjectRepository projectRepository,
+        final @Nonnull FetchService fetchService
     ) {
         this.pathUtil = pathUtil;
         this.fileUtil = fileUtil;
         this.yamlMapper = yamlMapper;
         this.projectRepository = projectRepository;
+        this.fetchService = fetchService;
     }
 
     public void init(
@@ -50,5 +53,6 @@ public class InitService {
         final Project project = builder.build();
 
         projectRepository.create(project);
+        fetchService.fetch(project);
     }
 }

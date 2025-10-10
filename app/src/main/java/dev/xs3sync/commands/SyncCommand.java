@@ -1,13 +1,7 @@
 package dev.xs3sync.commands;
 
-import dev.xs3sync.Bucket;
-import dev.xs3sync.Services;
-import dev.xs3sync.SyncService;
 import dev.xs3sync.project.Project;
-import jakarta.annotation.Nullable;
 import picocli.CommandLine.Command;
-
-import java.nio.file.Path;
 
 @Command(
     name = "sync",
@@ -19,6 +13,8 @@ final class SyncCommand extends BaseCommand {
     public void run() {
         init();
 
+        // final Project project = services.projectRepository().get();
+        // services.
         // for (final Project project : workspace.getProjects()) {
         //     final String destinationRegion = project.getDestinationRegion();
         //     final @Nullable String destinationProfile = project.getDestinationProfile();

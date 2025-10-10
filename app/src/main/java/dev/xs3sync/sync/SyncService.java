@@ -1,5 +1,7 @@
-package dev.xs3sync;
+package dev.xs3sync.sync;
 
+import dev.xs3sync.Bucket;
+import dev.xs3sync.FilesUtil;
 import dev.xs3sync.storage.Storage;
 import dev.xs3sync.storage.StorageItem;
 import dev.xs3sync.storage.StorageItemState;
@@ -10,13 +12,13 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import java.nio.file.Path;
 import java.util.List;
 
-public class FetchService {
+public class SyncService {
     private final @Nonnull Path path;
     private final @Nonnull FilesUtil filesUtil;
     private final @Nonnull Bucket bucket;
     private final @Nonnull StorageUtil storageUtil;
 
-    public FetchService(
+    public SyncService(
         final @Nonnull Path path,
         final @Nonnull FilesUtil filesUtil,
         final @Nonnull Bucket bucket,

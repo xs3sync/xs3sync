@@ -1,7 +1,6 @@
 package dev.xs3sync.commands;
 
 import dev.xs3sync.Services;
-import dev.xs3sync.workspace.Workspace;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import picocli.CommandLine.Option;
@@ -13,8 +12,6 @@ public abstract class BaseCommand implements Runnable {
 
     @Option(names = {"-wd", "--working-directory"})
     private @Nullable String workingDirectory;
-
-    protected Workspace workspace;
 
     protected Services services;
 

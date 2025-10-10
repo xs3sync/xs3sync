@@ -24,6 +24,22 @@ public class Project {
         this.exclude = exclude;
     }
 
+    public @Nonnull String getPath() {
+        return path;
+    }
+
+    public @Nonnull Destination getDestination() {
+        return destination;
+    }
+
+    public @Nonnull List<String> getInclude() {
+        return include;
+    }
+
+    public @Nonnull List<String> getExclude() {
+        return exclude;
+    }
+
     // builder ---------------------------------------------------------------------------------------------------------
     public static Builder builder(
         final @Nonnull String path
