@@ -2,15 +2,15 @@ package dev.xs3sync;
 
 import jakarta.annotation.Nonnull;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
+import java.util.zip.CRC32;
+import java.util.zip.CheckedInputStream;
 
 public class FilesUtil {
 
@@ -203,6 +203,21 @@ public class FilesUtil {
             Files.setLastModifiedTime(path, FileTime.fromMillis(time));
         } catch (IOException e) {
             throw new RuntimeException("Cannot set last modified time for: " + path, e);
+        }
+    }
+
+    public long calculateCRC32(final @Nonnull Path path) throws IOException {
+        final File file = path.toFile();
+        try (final InputStream in = new BufferedInputStream(new FileInputStream(file))) {
+            final CRC32 crc = new CRC32();
+            try (final CheckedInputStream checkedInputStream = new CheckedInputStream(in, crc)) {
+                byte[] buffer = new byte[4096];
+                //noinspection StatementWithEmptyBody
+                while (checkedInputStream.read(buffer) >= 0) {
+                    // czytanie wystarczy, suma się liczy automatycznie
+                }
+                return crc.getValue();
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ package dev.xs3sync.sync;
 
 import dev.xs3sync.Bucket;
 import dev.xs3sync.FilesUtil;
+import dev.xs3sync.project.Project;
 import dev.xs3sync.storage.Storage;
 import dev.xs3sync.storage.StorageItem;
 import dev.xs3sync.storage.StorageItemState;
@@ -13,27 +14,36 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class SyncService {
-    private final @Nonnull Path path;
     private final @Nonnull FilesUtil filesUtil;
-    private final @Nonnull Bucket bucket;
     private final @Nonnull StorageUtil storageUtil;
 
     public SyncService(
-        final @Nonnull Path path,
         final @Nonnull FilesUtil filesUtil,
-        final @Nonnull Bucket bucket,
         final @Nonnull StorageUtil storageUtil
     ) {
-        this.path = path;
         this.filesUtil = filesUtil;
-        this.bucket = bucket;
         this.storageUtil = storageUtil;
     }
 
-    public void sync() {
+    public void sync(
+        final @Nonnull Project project
+    ) {
+        final Bucket bucket = Bucket.createWithParameters(
+            project.getDestination().getBucket(),
+            project.getDestination().getRegion(),
+            project.getDestination().getProfile(),
+            project.getDestination().getAccessKeyId(),
+            project.getDestination().getSecretAccessKey(),
+            project.getDestination().getEndpoint()
+        );
+
         // local storage -----------------------------------------------------------------------------------------------
         final Storage localStorage = new Storage();
+        final Path path = Path.of(project.getPath());
         final List<Path> files = filesUtil.walk(path, List.of(), List.of())
+            .filter(path1 -> {
+                return !path.relativize(path1).startsWith(".xs3sync");
+            })
             .toList();
 
         for (final Path file : files) {
@@ -65,14 +75,14 @@ public class SyncService {
 
             if (remoteItem == null) {
                 bucket.putObject(
-                    getStorageItemKey(localItem),
+                    storageUtil.getStorageItemKey(localItem),
                     filesUtil.getInputStream(localItemPath),
                     filesUtil.getSize(localItemPath)
                 );
             } else {
                 if (localItem.modificationAt() > remoteItem.modificationAt()) {
                     bucket.putObject(
-                        getStorageItemKey(localItem),
+                        storageUtil.getStorageItemKey(localItem),
                         filesUtil.getInputStream(localItemPath),
                         filesUtil.getSize(localItemPath)
                     );
@@ -81,7 +91,7 @@ public class SyncService {
                         filesUtil.delete(localItemPath);
                     } else if (StorageItemState.synced.equals(remoteItem.state())) {
                         filesUtil.copy(
-                            bucket.getObject(getStorageItemKey(remoteItem)),
+                            bucket.getObject(storageUtil.getStorageItemKey(remoteItem)),
                             localItemPath
                         );
 
@@ -98,19 +108,11 @@ public class SyncService {
             if (localItem == null) {
                 if (StorageItemState.synced.equals(remoteItem.state())) {
                     bucket.move(
-                        getStorageItemKey(remoteItem),
-                        getStorageItemKey(remoteItem, StorageItemState.deleted)
+                        storageUtil.getStorageItemKey(remoteItem),
+                        storageUtil.getStorageItemKey(remoteItem, StorageItemState.deleted)
                     );
                 }
             }
         }
-    }
-
-    private String getStorageItemKey(final @Nonnull StorageItem item) {
-        return String.format("%s.%d.%s", item.path(), item.modificationAt(), item.state().name());
-    }
-
-    private String getStorageItemKey(final @Nonnull StorageItem item, final @Nonnull StorageItemState state) {
-        return String.format("%s.%d.%s", item.path(), item.modificationAt(), state.name());
     }
 }

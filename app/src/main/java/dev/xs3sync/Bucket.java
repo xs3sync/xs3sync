@@ -1,6 +1,7 @@
 package dev.xs3sync;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -57,6 +58,21 @@ public class Bucket {
             .build();
 
         return new Bucket(name, client);
+    }
+
+    public static Bucket createWithParameters(
+        final @Nonnull String bucket,
+        final @Nonnull String region,
+        final @Nullable String profile,
+        final @Nullable String accessKeyId,
+        final @Nullable String secretAccessKey,
+        final @Nullable String endpoint
+    ) {
+        if (profile != null) {
+            return createWithProfileCredentials(bucket, region, profile);
+        } else {
+            throw new RuntimeException("Implements accessKeyId and secretAccessKey bucket.");
+        }
     }
 
     public void putObject(

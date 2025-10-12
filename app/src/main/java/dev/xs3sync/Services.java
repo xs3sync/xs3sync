@@ -1,14 +1,15 @@
 package dev.xs3sync;
 
+import dev.xs3sync.encryption.EncryptionService;
 import dev.xs3sync.fetch.FetchService;
 import dev.xs3sync.project.ProjectRepository;
 import dev.xs3sync.storage.StorageUtil;
+import dev.xs3sync.sync.SyncService;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.nio.file.Path;
 
-@SuppressWarnings("ALL")
 public class Services {
     private final @Nonnull String workingDirectory;
     private @Nullable PathUtil pathUtil = null;
@@ -17,6 +18,8 @@ public class Services {
     private @Nullable StorageUtil storageUtil = null;
     private @Nullable ProjectRepository projectRepository = null;
     private @Nullable FetchService fetchService = null;
+    private @Nullable SyncService syncService = null;
+    private @Nullable EncryptionService encryptionService = null;
 
     public Services(final @Nonnull String workingDirectory) {
         this.pathUtil = new PathUtil();
@@ -82,5 +85,24 @@ public class Services {
         }
 
         return projectRepository;
+    }
+
+    public synchronized @Nonnull SyncService syncService() {
+        if (syncService == null) {
+            syncService = new SyncService(
+                filesUtil(),
+                storageUtil()
+            );
+        }
+
+        return syncService;
+    }
+
+    public synchronized @Nonnull EncryptionService encryptionService() {
+        if (encryptionService == null) {
+            encryptionService = new EncryptionService();
+        }
+
+        return encryptionService;
     }
 }

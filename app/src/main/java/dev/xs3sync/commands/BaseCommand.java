@@ -6,7 +6,6 @@ import jakarta.annotation.Nullable;
 import picocli.CommandLine.Option;
 
 public abstract class BaseCommand implements Runnable {
-
     @Option(names = {"-v", "--verbose"})
     private @Nonnull Integer verbose = 0;
 
