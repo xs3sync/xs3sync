@@ -69,6 +69,8 @@ public class FetchService {
                     bucket1.getObject(storageUtil.getStorageItemKey(remoteItem)),
                     localItemPath
                 );
+
+                filesUtil.setLastModifiedTime(localItemPath, remoteItem.modificationAt());
             }
         }
     }

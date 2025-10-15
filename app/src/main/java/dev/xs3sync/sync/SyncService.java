@@ -102,7 +102,6 @@ public class SyncService {
         }
 
         for (final StorageItem remoteItem : remoteStorage.getItems()) {
-            final Path localItemPath = path.resolve(remoteItem.path());
             final StorageItem localItem = localStorage.getItem(remoteItem.path());
 
             if (localItem == null) {

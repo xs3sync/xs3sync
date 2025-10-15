@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.s3.model.*;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -127,11 +128,24 @@ public class Bucket {
     }
 
     public @Nonnull List<S3Object> listObjects() {
-        final ListObjectsV2Request request = ListObjectsV2Request.builder()
-            .bucket(name)
-            .build();
+        final List<S3Object> objects = new ArrayList<>();
+        ListObjectsV2Response response = null;
+        String continuationToken = null;
 
-        return client.listObjectsV2(request).contents();
+        do {
+            final ListObjectsV2Request.Builder requestBuilder = ListObjectsV2Request.builder()
+                .bucket(name);
+
+            if (continuationToken != null) {
+                requestBuilder.continuationToken(continuationToken);
+            }
+
+            response = client.listObjectsV2(requestBuilder.build());
+            objects.addAll(response.contents());
+            continuationToken = response.nextContinuationToken();
+        } while (response.isTruncated());
+
+        return objects;
     }
 
     // public @Nonnull InputStream getInputStream(final @Nonnull String path) {
