@@ -12,6 +12,7 @@ final class SyncCommand extends BaseCommand {
     public void run() {
         init();
 
-        services.syncService().sync(services.projectRepository().get());
+        services.syncService()
+            .sync(services.projectRepository().get());
     }
 }
