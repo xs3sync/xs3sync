@@ -185,10 +185,63 @@ public class Bucket {
             .key(key)
             .build();
 
-        return client.getObject(request);
+        final ResponseInputStream<GetObjectResponse> object = client.getObject(request);
+        long contentLength = object.response().contentLength();
+
+        return new ResponseInputStream<>(
+            object.response(),
+            new ProgressInputStream(object, contentLength, key)
+        );
     }
 
     public void close() {
         client.close();
+    }
+
+    static class ProgressInputStream extends FilterInputStream {
+        private final long totalBytes;
+        private long bytesRead = 0;
+        private final String fileName;
+        private int lastDrawn = -1;
+
+        protected ProgressInputStream(InputStream in, long totalBytes, String fileName) {
+            super(in);
+            this.totalBytes = totalBytes;
+            this.fileName = fileName;
+        }
+
+        @Override
+        public int read() throws IOException {
+            int b = super.read();
+            if (b != -1) updateProgress(1);
+            return b;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int n = super.read(b, off, len);
+            if (n > 0) updateProgress(n);
+            return n;
+        }
+
+        private void updateProgress(int bytes) {
+            bytesRead += bytes;
+            if (totalBytes <= 0) return;
+
+            int percent = (int) ((bytesRead * 100) / totalBytes);
+            if (percent != lastDrawn && percent % 2 == 0) { // aktualizuj co 2%
+                int barWidth = 20;
+                int filled = (int) (percent / (100.0 / barWidth));
+                String bar = "[" + "#".repeat(filled) + " ".repeat(barWidth - filled) + "]";
+                System.out.printf("\rPobieranie: %-24s %3d%% %s", bar, percent, fileName);
+                lastDrawn = percent;
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            System.out.printf("\rPobieranie: [####################] 100%% %s ✅%n", fileName);
+        }
     }
 }

@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class FetchService {
-
     private final @Nonnull ProjectRepository projectRepository;
     private final @Nonnull FilesUtil filesUtil;
     private final @Nonnull StorageUtil storageUtil;

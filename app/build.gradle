@@ -1,6 +1,10 @@
 plugins {
-    // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+}
+
+application {
+    applicationName = 'xs3sync'
+    mainClass = 'dev.xs3sync.commands.Xs3SyncCommand'
 }
 
 repositories {
@@ -28,11 +32,6 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
-}
-
-application {
-    // Define the main class for the application.
-    mainClass = 'dev.xs3sync.commands.Xs3SyncCommand'
 }
 
 tasks.named('test') {
