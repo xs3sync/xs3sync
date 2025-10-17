@@ -18,12 +18,11 @@ public class Storage {
     ) {
         final List<StorageItem> versions = items.computeIfAbsent(path, k -> new ArrayList<>());
         versions.add(new StorageItem(path, modificationAt, state));
-        versions.sort((o1, o2) -> Long.compare(o2.modificationAt(), o1.modificationAt()) * -1);
+        versions.sort((o1, o2) -> Long.compare(o1.modificationAt(), o2.modificationAt()) * -1);
     }
 
     public @Nonnull List<StorageItem> getItems() {
         final List<StorageItem> result = new ArrayList<>();
-
         for (final List<StorageItem> versions : items.values()) {
             result.add(versions.getFirst());
         }
