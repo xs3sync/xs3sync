@@ -83,28 +83,30 @@ public class FetchService {
         final @Nullable String profile,
         final @Nullable String endpoint
     ) {
-        if (!filesUtil.isDirectory(Path.of(workingDirectory))) {
-            throw new RuntimeException("Working directory %s does not exist or is not a directory".formatted(workingDirectory));
-        }
+        // todo
+        // if (!filesUtil.isDirectory(Path.of(workingDirectory))) {
+        //     throw new RuntimeException("Working directory %s does not exist or is not a directory".formatted(workingDirectory));
+        // }
 
-        if (!filesUtil.isEmpty(Path.of(workingDirectory))) {
-            throw new RuntimeException("Working directory %s is not empty".formatted(workingDirectory));
-        }
+        // if (!filesUtil.isEmpty(Path.of(workingDirectory))) {
+        //     throw new RuntimeException("Working directory %s is not empty".formatted(workingDirectory));
+        // }
 
-        if (projectRepository.exists()) {
-            throw new RuntimeException("Project already exists");
-        }
+        // if (projectRepository.exists()) {
+        //     throw new RuntimeException("Project already exists");
+        // }
 
-        final Project.Builder builder = Project.builder(workingDirectory);
+        // final Project.Builder builder = Project.builder(workingDirectory);
 
-        if (profile != null) {
-            builder.setDestination(bucket, region, profile);
-        } else {
-            // throw new RuntimeException("Either profile or access keys must be provided");
-        }
+        // if (profile != null) {
+        //     builder.setDestination(bucket, region, profile);
+        // } else {
+        //     // throw new RuntimeException("Either profile or access keys must be provided");
+        // }
 
-        final Project project = builder.build();
-        projectRepository.create(project);
-        return project;
+        // final Project project = builder.build();
+        // projectRepository.create(project);
+        // return project;
+        return null;
     }
 }

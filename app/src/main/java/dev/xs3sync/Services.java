@@ -2,6 +2,7 @@ package dev.xs3sync;
 
 import dev.xs3sync.encryption.EncryptionService;
 import dev.xs3sync.fetch.FetchService;
+import dev.xs3sync.init.InitService;
 import dev.xs3sync.project.ProjectRepository;
 import dev.xs3sync.storage.StorageUtil;
 import dev.xs3sync.sync.SyncService;
@@ -17,6 +18,7 @@ public class Services {
     private @Nullable YamlMapper yamlMapper = null;
     private @Nullable StorageUtil storageUtil = null;
     private @Nullable ProjectRepository projectRepository = null;
+    private @Nullable InitService initService = null;
     private @Nullable FetchService fetchService = null;
     private @Nullable SyncService syncService = null;
     private @Nullable EncryptionService encryptionService = null;
@@ -60,6 +62,18 @@ public class Services {
         }
 
         return storageUtil;
+    }
+
+    public synchronized @Nonnull InitService initService() {
+        if (initService == null) {
+            initService = new InitService(
+                projectRepository(),
+                filesUtil(),
+                storageUtil()
+            );
+        }
+
+        return initService;
     }
 
     public synchronized @Nonnull FetchService fetchService() {

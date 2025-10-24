@@ -3,7 +3,7 @@ package dev.xs3sync.project;
 import dev.xs3sync.FilesUtil;
 import dev.xs3sync.PathUtil;
 import dev.xs3sync.YamlMapper;
-import dev.xs3sync.project.ProjectYaml.DestinationYml;
+import dev.xs3sync.project.ProjectYamlV1.DestinationYml;
 import jakarta.annotation.Nonnull;
 
 import java.nio.file.Path;
@@ -45,10 +45,12 @@ public class ProjectRepository {
         }
 
         final Path projectYamlPath = xs3syncPath.resolve("project.yml");
-        final ProjectYaml projectYaml = yamlMapper.readValue(projectYamlPath.toFile(), ProjectYaml.class);
+        final ProjectYamlV1 projectYaml = yamlMapper.readValue(projectYamlPath.toFile(), ProjectYamlV1.class);
 
         return new Project(
+            projectYaml.version(),
             workingDirectory,
+            projectYaml.fetched(),
             new Project.Destination(
                 projectYaml.destination().bucket(),
                 projectYaml.destination().region(),
@@ -62,6 +64,30 @@ public class ProjectRepository {
         );
     }
 
+    public void create(
+        final @Nonnull String bucket,
+        final @Nonnull String region,
+        final @Nonnull String profile
+    ) {
+        final @Nonnull Project project = new Project(
+            1,
+            workingDirectory,
+            false,
+            new Project.Destination(
+                bucket,
+                region,
+                null,
+                null,
+                profile,
+                null
+            ),
+            new ArrayList<>(),
+            new ArrayList<>()
+        );
+
+        create(project);
+    }
+
     public void create(final @Nonnull Project project) {
         final Path xs3syncPath = Path.of(workingDirectory).resolve(".xs3sync");
         final Path projectYamlPath = xs3syncPath.resolve("project.yml");
@@ -70,7 +96,9 @@ public class ProjectRepository {
             throw new RuntimeException("The directory %s is already a xs3sync project.".formatted(workingDirectory));
         }
 
-        final ProjectYaml projectYaml = new ProjectYaml(
+        final ProjectYamlV1 projectYaml = new ProjectYamlV1(
+            1,
+            project.fetched,
             new DestinationYml(
                 project.destination.bucket,
                 project.destination.region,
