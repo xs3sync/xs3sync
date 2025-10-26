@@ -15,19 +15,22 @@ repositories {
 dependencies {
     // implementation
     implementation libs.guava
-    implementation 'info.picocli:picocli:4.7.7'
-    implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.20.0'
+    implementation libs.picocli
+    implementation libs.jakarta.annotation.api
+    implementation libs.jackson.dataformat.yaml
 
     // test
     testImplementation libs.junit.jupiter
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // s3
-    implementation 'software.amazon.awssdk:s3:2.34.3'
+    implementation libs.s3
+
+    // slf4j
+    implementation libs.slf4j.api
+    implementation libs.slf4j.simple
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)

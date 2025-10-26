@@ -2,6 +2,8 @@ package dev.xs3sync;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Bucket {
+    private static final @Nonnull Logger log = LoggerFactory.getLogger(Bucket.class);
     private final @Nonnull String name;
     private final @Nonnull S3Client client;
 
@@ -81,6 +84,7 @@ public class Bucket {
         final @Nonnull InputStream inputStream,
         final @Nonnull Long contentLength
     ) {
+        log.info("Putting object to bucket: {}", key);
         final PutObjectRequest request = PutObjectRequest.builder()
             .bucket(name)
             .key(key)
@@ -162,6 +166,7 @@ public class Bucket {
         final @Nonnull String key,
         final @Nonnull String newKey
     ) {
+        log.info("Moving object to bucket: {}", key);
         final CopyObjectRequest copyRequest = CopyObjectRequest.builder()
             .sourceBucket(name)
             .sourceKey(key)

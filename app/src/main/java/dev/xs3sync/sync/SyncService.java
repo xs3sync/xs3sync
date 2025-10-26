@@ -2,6 +2,7 @@ package dev.xs3sync.sync;
 
 import dev.xs3sync.Bucket;
 import dev.xs3sync.FilesUtil;
+import dev.xs3sync.exceptions.DestinationProfileIsNotSetException;
 import dev.xs3sync.project.Project;
 import dev.xs3sync.project.Project.FileMetadata;
 import dev.xs3sync.project.ProjectRepository;
@@ -10,12 +11,16 @@ import dev.xs3sync.storage.StorageItem;
 import dev.xs3sync.storage.StorageItemState;
 import dev.xs3sync.storage.StorageUtil;
 import jakarta.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.nio.file.Path;
 import java.util.List;
 
 public class SyncService {
+    private static final @Nonnull Logger log = LoggerFactory.getLogger(SyncService.class);
+
     private final @Nonnull FilesUtil filesUtil;
     private final @Nonnull StorageUtil storageUtil;
     private final @Nonnull ProjectRepository projectRepository;
@@ -47,7 +52,28 @@ public class SyncService {
         );
 
         final Storage localStorage = loadLocalStorage(project);
-        final Storage remoteStorage = loadRemoteStorage(bucket);
+        Storage remoteStorage = loadRemoteStorage(bucket);
+
+        // clean remote deleted items ----------------------------------------------------------------------------------
+        boolean remoteStorageChanged = false;
+        for (final FileMetadata file : project.getFiles()) {
+            final StorageItem localItem = localStorage.getItem(file.getPath());
+
+            if (localItem == null) {
+                final StorageItem remoteItem = remoteStorage.getItem(file.getPath());
+                if (remoteItem != null && !StorageItemState.deleted.equals(remoteItem.state())) {
+                    bucket.move(
+                        storageUtil.getStorageItemKey(remoteItem),
+                        storageUtil.getStorageItemKey(remoteItem, StorageItemState.deleted)
+                    );
+                    remoteStorageChanged = true;
+                }
+            }
+        }
+
+        if (remoteStorageChanged) {
+            remoteStorage = loadRemoteStorage(bucket);
+        }
 
         // sync --------------------------------------------------------------------------------------------------------
         for (final StorageItem localItem : localStorage.getItems()) {
@@ -82,16 +108,18 @@ public class SyncService {
             }
         }
 
-        for (final FileMetadata file : project.getFiles()) {
-            final StorageItem localItem = localStorage.getItem(file.getPath());
+        for (final StorageItem remoteItem : remoteStorage.getItems()) {
+            final StorageItem localItem = localStorage.getItem(remoteItem.path());
 
             if (localItem == null) {
-                final StorageItem remoteItem = remoteStorage.getItem(file.getPath());
-                if (remoteItem != null && !StorageItemState.deleted.equals(remoteItem.state())) {
-                    bucket.move(
-                        storageUtil.getStorageItemKey(remoteItem),
-                        storageUtil.getStorageItemKey(remoteItem, StorageItemState.deleted)
+                if (StorageItemState.synced.equals(remoteItem.state())) {
+                    final Path localItemPath = path.resolve(remoteItem.path());
+                    filesUtil.copy(
+                        bucket.getObject(storageUtil.getStorageItemKey(remoteItem)),
+                        localItemPath
                     );
+
+                    filesUtil.setLastModifiedTime(localItemPath, remoteItem.modificationAt());
                 }
             }
         }
@@ -135,14 +163,6 @@ public class SyncService {
         return storage;
     }
 
-    private void setProjectFetched(
-        final Project project,
-        final @Nonnull Boolean fetched
-    ) {
-        project.setFetched(fetched);
-        projectRepository.save(project);
-    }
-
     private void updateProjectFiles(
         final @Nonnull Project project
     ) {
@@ -157,44 +177,47 @@ public class SyncService {
     }
 
     private void fetch(final @Nonnull Project project) {
-//        final String profile = project.getDestination().getProfile();
-//        final Path path = Path.of(project.getPath());
-//
-//        if (profile == null) {
-//            throw new DestinationProfileIsNotSetException();
-//        }
-//
-//        final Bucket bucket = Bucket.createWithProfileCredentials(
-//            project.getDestination().getBucket(),
-//            project.getDestination().getRegion(),
-//            profile
-//        );
-//
-//        final Storage remoteStorage = new Storage();
-//        final List<S3Object> objects = bucket.listObjects();
-//
-//        for (final S3Object object : objects) {
-//            final StorageUtil.DecodedKey decodedKey = storageUtil.decodeKey(object.key());
-//
-//            remoteStorage.addItem(
-//                decodedKey.path(),
-//                decodedKey.modifiedAt(),
-//                StorageItemState.valueOf(decodedKey.state())
-//            );
-//        }
-//
-//        for (final StorageItem remoteItem : remoteStorage.getItems()) {
-//            final Path localItemPath = path.resolve(remoteItem.path());
-//            if (StorageItemState.synced.equals(remoteItem.state())) {
-//                filesUtil.copy(
-//                    bucket.getObject(storageUtil.getStorageItemKey(remoteItem)),
-//                    localItemPath
-//                );
-//
-//                filesUtil.setLastModifiedTime(localItemPath, remoteItem.modificationAt());
-//            }
-//        }
-//
-        setProjectFetched(project, true);
+        log.info("Starting initial fetch for project at path: {}", project.getPath());
+        final String profile = project.getDestination().getProfile();
+        final Path path = Path.of(project.getPath());
+
+        if (profile == null) {
+            throw new DestinationProfileIsNotSetException();
+        }
+
+        final Bucket bucket = Bucket.createWithProfileCredentials(
+            project.getDestination().getBucket(),
+            project.getDestination().getRegion(),
+            profile
+        );
+
+        final Storage remoteStorage = new Storage();
+        final List<S3Object> objects = bucket.listObjects();
+
+        for (final S3Object object : objects) {
+            final StorageUtil.DecodedKey decodedKey = storageUtil.decodeKey(object.key());
+            remoteStorage.addItem(
+                decodedKey.path(),
+                decodedKey.modifiedAt(),
+                StorageItemState.valueOf(decodedKey.state())
+            );
+        }
+
+        for (final StorageItem remoteItem : remoteStorage.getItems()) {
+            final Path localItemPath = path.resolve(remoteItem.path());
+            if (StorageItemState.synced.equals(remoteItem.state())) {
+                log.info("Fetching file: {}", remoteItem.path());
+                filesUtil.copy(
+                    bucket.getObject(storageUtil.getStorageItemKey(remoteItem)),
+                    localItemPath
+                );
+
+                filesUtil.setLastModifiedTime(localItemPath, remoteItem.modificationAt());
+            }
+        }
+
+        project.setFetched(true);
+        projectRepository.save(project);
+        updateProjectFiles(project);
     }
 }
