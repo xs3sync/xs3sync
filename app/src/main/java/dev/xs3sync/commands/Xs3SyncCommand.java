@@ -10,18 +10,15 @@ import picocli.CommandLine.Command;
     description = "Narzędzie do synchronizacji z S3"
 )
 public class Xs3SyncCommand extends BaseCommand {
-
     public static void main(String[] args) {
         final CommandLine cmd = new CommandLine(new Xs3SyncCommand());
         cmd.addSubcommand("init", new InitCommand());
         cmd.addSubcommand("sync", new SyncCommand());
-
-        // cmd.addSubcommand("fetch", new FetchCommand());
         cmd.execute(args);
     }
 
     @Override
-    public void run() {
-        init();
+    void handleCommand() {
+        throw new RuntimeException("Nie podano podkomendy. Użyj --help, aby zobaczyć dostępne podkomendy.");
     }
 }

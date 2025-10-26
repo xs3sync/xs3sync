@@ -105,7 +105,8 @@ public class Services {
         if (syncService == null) {
             syncService = new SyncService(
                 filesUtil(),
-                storageUtil()
+                storageUtil(),
+                projectRepository()
             );
         }
 

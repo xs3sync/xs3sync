@@ -4,6 +4,7 @@ import dev.xs3sync.FilesUtil;
 import dev.xs3sync.PathUtil;
 import dev.xs3sync.YamlMapper;
 import dev.xs3sync.project.ProjectYamlV1.DestinationYml;
+import dev.xs3sync.project.ProjectYamlV1.FileMetadata;
 import jakarta.annotation.Nonnull;
 
 import java.nio.file.Path;
@@ -60,8 +61,42 @@ public class ProjectRepository {
                 projectYaml.destination().endpoint()
             ),
             new ArrayList<>(),
-            new ArrayList<>()
+            new ArrayList<>(),
+            projectYaml.files().stream()
+                .map(fileMetadata -> {
+                    return new Project.FileMetadata(
+                        fileMetadata.path(),
+                        fileMetadata.modifiedAt()
+                    );
+                }).toList()
         );
+    }
+
+    public void save(final @Nonnull Project project) {
+        final Path xs3syncPath = Path.of(workingDirectory).resolve(".xs3sync");
+        final Path projectYamlPath = xs3syncPath.resolve("project.yml");
+        final ProjectYamlV1 projectYaml = new ProjectYamlV1(
+            1,
+            project.fetched,
+            new DestinationYml(
+                project.destination.bucket,
+                project.destination.region,
+                project.destination.accessKeyId,
+                project.destination.secretAccessKey,
+                project.destination.profile,
+                project.destination.endpoint
+            ),
+            project.files.stream()
+                .map(file -> {
+                    return new FileMetadata(
+                        file.path,
+                        file.modifiedAt
+                    );
+                }).toList()
+        );
+
+        fileUtil.createDirectories(xs3syncPath);
+        yamlMapper.write(projectYaml, projectYamlPath.toString());
     }
 
     public void create(
@@ -81,6 +116,7 @@ public class ProjectRepository {
                 profile,
                 null
             ),
+            new ArrayList<>(),
             new ArrayList<>(),
             new ArrayList<>()
         );
@@ -106,7 +142,14 @@ public class ProjectRepository {
                 project.destination.secretAccessKey,
                 project.destination.profile,
                 project.destination.endpoint
-            )
+            ),
+            project.files.stream()
+                .map(file -> {
+                    return new FileMetadata(
+                        file.path,
+                        file.modifiedAt
+                    );
+                }).toList()
         );
 
         fileUtil.createDirectories(xs3syncPath);

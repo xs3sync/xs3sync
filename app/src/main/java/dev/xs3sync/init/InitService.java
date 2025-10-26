@@ -1,6 +1,9 @@
 package dev.xs3sync.init;
 
 import dev.xs3sync.FilesUtil;
+import dev.xs3sync.exceptions.ProjectAlreadyExistsExistsException;
+import dev.xs3sync.exceptions.WorkingDirectoryDoesNotExistsException;
+import dev.xs3sync.exceptions.WorkingDirectoryIsNotEmptyException;
 import dev.xs3sync.project.ProjectRepository;
 import dev.xs3sync.storage.StorageUtil;
 import jakarta.annotation.Nonnull;
@@ -33,15 +36,15 @@ public class InitService {
         final @Nullable String endpoint
     ) {
         if (!filesUtil.isDirectory(Path.of(workingDirectory))) {
-            throw new RuntimeException("Working directory %s does not exist or is not a directory".formatted(workingDirectory));
+            throw new WorkingDirectoryDoesNotExistsException(workingDirectory);
         }
 
         if (!filesUtil.isEmpty(Path.of(workingDirectory))) {
-            throw new RuntimeException("Working directory %s is not empty".formatted(workingDirectory));
+            throw new WorkingDirectoryIsNotEmptyException(workingDirectory);
         }
 
         if (projectRepository.exists()) {
-            throw new RuntimeException("Project already exists");
+            throw new ProjectAlreadyExistsExistsException(workingDirectory);
         }
 
         if (profile == null) {

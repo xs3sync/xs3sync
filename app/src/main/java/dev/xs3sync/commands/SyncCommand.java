@@ -1,6 +1,5 @@
 package dev.xs3sync.commands;
 
-import dev.xs3sync.sync.SyncService;
 import picocli.CommandLine.Command;
 
 @Command(
@@ -9,9 +8,7 @@ import picocli.CommandLine.Command;
 )
 final class SyncCommand extends BaseCommand {
     @Override
-    public void run() {
-        init();
-
+    void handleCommand() {
         services.syncService()
             .sync(services.projectRepository().get());
     }

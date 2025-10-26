@@ -30,9 +30,7 @@ final class InitCommand extends BaseCommand {
     private @Nullable String endpoint;
 
     @Override
-    public void run() {
-        init();
-
+    void handleCommand() {
         services.initService().init(
             services.workingDirectory(),
             bucket,
