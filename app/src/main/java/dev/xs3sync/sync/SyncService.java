@@ -97,6 +97,10 @@ public class SyncService {
                     if (StorageItemState.deleted.equals(remoteItem.state())) {
                         filesUtil.delete(localItemPath);
                     } else if (StorageItemState.synced.equals(remoteItem.state())) {
+                        if (filesUtil.exists(localItemPath)) {
+                            filesUtil.delete(localItemPath);
+                        }
+
                         filesUtil.copy(
                             bucket.getObject(storageUtil.getStorageItemKey(remoteItem)),
                             localItemPath
