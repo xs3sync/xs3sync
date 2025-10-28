@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SyncService {
@@ -51,6 +52,7 @@ public class SyncService {
             project.getDestination().getEndpoint()
         );
 
+        final List<String> processed = new ArrayList<>();
         final Storage localStorage = loadLocalStorage(project);
         Storage remoteStorage = loadRemoteStorage(bucket);
 
@@ -59,7 +61,7 @@ public class SyncService {
         for (final FileMetadata file : project.getFiles()) {
             final StorageItem localItem = localStorage.getItem(file.getPath());
 
-            if (localItem == null) {
+            if (localItem != null) {
                 continue;
             }
 
@@ -70,6 +72,7 @@ public class SyncService {
                     storageUtil.getStorageItemKey(remoteItem),
                     storageUtil.getStorageItemKey(remoteItem, StorageItemState.deleted)
                 );
+                processed.add(file.getPath());
                 remoteStorageChanged = true;
             }
         }
@@ -80,6 +83,10 @@ public class SyncService {
 
         // sync --------------------------------------------------------------------------------------------------------
         for (final StorageItem localItem : localStorage.getItems()) {
+            if (processed.contains(localItem.path())) {
+                continue;
+            }
+
             final Path localItemPath = path.resolve(localItem.path());
             final StorageItem remoteItem = remoteStorage.getItem(localItem.path());
 
@@ -89,45 +96,75 @@ public class SyncService {
                     filesUtil.getInputStream(localItemPath),
                     filesUtil.getSize(localItemPath)
                 );
-            } else {
-                if (localItem.modificationAt() > remoteItem.modificationAt()) {
+                processed.add(localItem.path());
+            } else if (
+                StorageItemState.synced.equals(remoteItem.state()) &&
+                localItem.modificationAt() > remoteItem.modificationAt()
+            ) {
+                bucket.putObject(
+                    storageUtil.getStorageItemKey(localItem),
+                    filesUtil.getInputStream(localItemPath),
+                    filesUtil.getSize(localItemPath)
+                );
+                processed.add(localItem.path());
+            } else if (
+                StorageItemState.synced.equals(remoteItem.state()) &&
+                localItem.modificationAt() < remoteItem.modificationAt()
+            ) {
+                if (!remoteStorage.existsItem(localItem.path(), localItem.modificationAt())) {
+                    // Local version exists but is not present in S3, while S3 contains a newer version.
                     bucket.putObject(
                         storageUtil.getStorageItemKey(localItem),
                         filesUtil.getInputStream(localItemPath),
                         filesUtil.getSize(localItemPath)
                     );
-                } else if (localItem.modificationAt() < remoteItem.modificationAt()) {
-                    if (StorageItemState.deleted.equals(remoteItem.state())) {
-                        filesUtil.delete(localItemPath);
-                    } else if (StorageItemState.synced.equals(remoteItem.state())) {
-                        if (filesUtil.exists(localItemPath)) {
-                            filesUtil.delete(localItemPath);
-                        }
-
-                        filesUtil.copy(
-                            bucket.getObject(storageUtil.getStorageItemKey(remoteItem)),
-                            localItemPath
-                        );
-
-                        filesUtil.setLastModifiedTime(localItemPath, remoteItem.modificationAt());
-                    }
                 }
+
+                // Then remove local version and download newest from S3.
+                filesUtil.delete(localItemPath);
+                filesUtil.copy(
+                    bucket.getObject(storageUtil.getStorageItemKey(remoteItem)),
+                    localItemPath
+                );
+                filesUtil.setLastModifiedTime(localItemPath, remoteItem.modificationAt());
+                processed.add(localItem.path());
             }
         }
 
         for (final StorageItem remoteItem : remoteStorage.getItems()) {
             final StorageItem localItem = localStorage.getItem(remoteItem.path());
+            final Path localItemPath = path.resolve(remoteItem.path());
 
-            if (localItem == null) {
-                if (StorageItemState.synced.equals(remoteItem.state())) {
-                    final Path localItemPath = path.resolve(remoteItem.path());
-                    filesUtil.copy(
-                        bucket.getObject(storageUtil.getStorageItemKey(remoteItem)),
-                        localItemPath
+            if (
+                StorageItemState.synced.equals(remoteItem.state()) &&
+                localItem == null
+            ) {
+                filesUtil.copy(bucket.getObject(storageUtil.getStorageItemKey(remoteItem)), localItemPath);
+                filesUtil.setLastModifiedTime(localItemPath, remoteItem.modificationAt());
+            } else if (
+                StorageItemState.deleted.equals(remoteItem.state()) &&
+                localItem != null &&
+                localItem.modificationAt() <= remoteItem.modificationAt()
+            ) {
+                if (!remoteStorage.existsItem(localItem.path(), localItem.modificationAt())) {
+                    // Local version exists but is not present in S3, while S3 contains a newer version.
+                    bucket.putObject(
+                        storageUtil.getStorageItemKey(localItem),
+                        filesUtil.getInputStream(localItemPath),
+                        filesUtil.getSize(localItemPath)
                     );
-
-                    filesUtil.setLastModifiedTime(localItemPath, remoteItem.modificationAt());
                 }
+                filesUtil.delete(localItemPath);
+            } else if (
+                StorageItemState.deleted.equals(remoteItem.state()) &&
+                localItem != null
+                // localItem.modificationAt() > remoteItem.modificationAt()
+            ) {
+                bucket.putObject(
+                    storageUtil.getStorageItemKey(localItem),
+                    filesUtil.getInputStream(localItemPath),
+                    filesUtil.getSize(localItemPath)
+                );
             }
         }
 

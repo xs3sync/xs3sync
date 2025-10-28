@@ -39,4 +39,34 @@ public class Storage {
             return result.getFirst();
         }
     }
+
+    public boolean existsItem(
+        final @Nonnull String path,
+        final @Nonnull Long modificationAt
+    ) {
+        final @Nullable List<StorageItem> result = this.items.get(path);
+
+        if (result == null) {
+            return false;
+        } else {
+            return result.stream()
+                .anyMatch(o -> o.modificationAt().equals(modificationAt));
+        }
+    }
+
+    public @Nullable StorageItem getItem(
+        final @Nonnull String path,
+        final @Nonnull Long modificationAt
+    ) {
+        final @Nullable List<StorageItem> result = this.items.get(path);
+
+        if (result == null) {
+            return null;
+        } else {
+            return result.stream()
+                .filter(o -> o.modificationAt().equals(modificationAt))
+                .findFirst()
+                .orElse(null);
+        }
+    }
 }
