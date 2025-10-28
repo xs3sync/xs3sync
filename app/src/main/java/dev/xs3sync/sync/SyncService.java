@@ -60,14 +60,17 @@ public class SyncService {
             final StorageItem localItem = localStorage.getItem(file.getPath());
 
             if (localItem == null) {
-                final StorageItem remoteItem = remoteStorage.getItem(file.getPath());
-                if (remoteItem != null && !StorageItemState.deleted.equals(remoteItem.state())) {
-                    bucket.move(
-                        storageUtil.getStorageItemKey(remoteItem),
-                        storageUtil.getStorageItemKey(remoteItem, StorageItemState.deleted)
-                    );
-                    remoteStorageChanged = true;
-                }
+                continue;
+            }
+
+            final StorageItem remoteItem = remoteStorage.getItem(file.getPath());
+
+            if (remoteItem != null && !StorageItemState.deleted.equals(remoteItem.state())) {
+                bucket.move(
+                    storageUtil.getStorageItemKey(remoteItem),
+                    storageUtil.getStorageItemKey(remoteItem, StorageItemState.deleted)
+                );
+                remoteStorageChanged = true;
             }
         }
 
