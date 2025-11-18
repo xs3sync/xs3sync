@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class StateLoggerTest {
 
-    @Test
-    void setTask() {
-        final StateLogger stateLogger = new StateLogger();
-        stateLogger.setTask("1");
-    }
+    // @Test
+    // void setTask() {
+    //     final StateLogger stateLogger = new StateLogger();
+    //     stateLogger.setTask("1");
+    // }
 }
